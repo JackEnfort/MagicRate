@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MagicPlan Azimuth Facade Calculator</title>
+
+<style>
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    margin:20px;
+    background:#f9f9f9;
+    color:#333;
+}
+
+h2, h3{
+    color:#111;
+    margin-bottom:5px;
+}
+
+.container {
+    background:#fff;
+    padding:20px;
+    border-radius:8px;
+    box-shadow:0 2px 4px rgba(0,0,0,0.1);
+    max-width:1150px;
+    margin:0 auto;
+}
+
+.control-group {
+    background:#f4f4f4;
+    padding:15px;
+    border-radius:6px;
+    margin-bottom:20px;
+}
+
+input[type="file"], select {
+    margin:5px 0 15px 0;
+}
+
+input[type="number"], select {
+    padding:6px;
+    font-size:1em;
+}
+
+input[type="number"] {
+    width:80px;
+}
+
+select {
+    width: 220px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+button{
+    padding:10px 20px;
+    background:#007bef;
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0063c1;
+}
+
+table{
+    border-collapse:collapse;
+    width:100%;
+    margin-top:15px;
+    margin-bottom:30px;
+}
+
+th,td{
+    border:1px solid #ddd;
+    padding:10px;
+    text-align:left;
+}
+
+th{
+    background:#f4f4f4;
+    font-weight:bold;
+}
+
+.summary-box {
+    background:#e8f5e9;
+    border-left:5px solid #28a745;
+    padding:15px;
+    margin-bottom:20px;
+    border-radius:0 4px 4px 0;
+    font-size:1.1em;
+    line-height:1.5em;
+}
+
+.azimuth-tag {
+    background:#fff3e0;
+    color:#e65100;
+    padding:4px 8px;
+    border-radius:4px;
+    font-weight:bold;
+}
+
+.compass-tag {
+    background:#e1f5fe;
+    color:#0288d1;
+    padding:4px 8px;
+    border-radius:4px;
+    font-weight:bold;
+}
+
+pre{
+    background:#fafafa;
+    border:1px solid #ddd;
+    padding:10px;
+    overflow:auto;
+    max-height:300px;
+}
+
+.success{
+    color:green;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>MagicPlan Dynamic Azimuth Facade Calculator</h2>
+    <p>
+    Computes precise building envelope metrics, true surface profiles, and specific window distributions grouped dynamically by angular headings across multiple levels.
+    </p>
+
+    <div class="control-group">
+        <label><strong>Number of Stories:</strong></label><br>
+        <select id="numStories" onchange="updateSvgInputs()">
+            <option value="1" selected>Single Story</option>
+            <option value="2">Double Story</option>
+            <option value="3">3 Stories</option>
+            <option value="4">4 Stories</option>
+            <option value="5">5 Stories</option>
+        </select><br>
+
+        <!-- Dynamic SVG file inputs populate here -->
+        <div id="svgInputsContainer"></div>
+        
+        <label><strong>Select Layout CSV File:</strong></label><br>
+        <input id="csvFile" type="file" accept=".csv"><br>
+
+        <label><strong>True North Rotation Offset (Degrees Clockwise):</strong></label><br>
+        <input id="rotationOffset" type="number" value="0" min="0" max="359"> °
+    </div>
+
+    <button onclick="calculateBuildingMetrics()">Run Azimuth Calculations</button>
+
+    <div id="status"></div>
+
+    <div id="heightSummary" class="summary-box" style="display:none;"></div>
+
+    <h3>Grand Facade Dynamic Totals</h3>
+    <table id="totalsTable">
+        <thead>
+            <tr>
+                <th>Compass Point heading</th>
+                <th>True Azimuth Angle</th>
+                <th>Compass Point</th>
+                <th>Total Length (m)</th>
+                <th>Gross Wall Area (m²)</th>
+                <th>Total Window Area (m²)</th>
+                <th>Net Solid Wall Area (m²)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="7" style="color:#666; text-align:center;">Upload data files to view calculations.</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Discovered Window Bearings</h3>
+    <table id="windowTable">
+        <thead>
+            <tr>
+                <th>Floor & Room Name</th>
+                <th>Window Asset Type</th>
+                <th>Wall ID Link</th>
+                <th>True Azimuth Bearing</th>
+                <th>Compass Point (16-Way)</th>
+                <th>Dimensions (W × H)</th>
+                <th>Calculated Area</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="7" style="color:#666; text-align:center;">Upload data files to view windows.</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Debug Output Log</h3>
+    <pre id="debugLog">No files processed yet.</pre>
+</div>
+
+<script>
+
+// Floor designations array mapping indices to names
+const floorNames = ["Ground Floor", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"];
+
+function updateSvgInputs() {
+    const numStories = parseInt(document.getElementById('numStories').value);
+    const container = document.getElementById('svgInputsContainer');
+    container.innerHTML = '';
+    
+    for (let i = 0; i < numStories; i++) {
+        const label = document.createElement('label');
+        label.innerHTML = `<strong>${floorNames[i]} SVG Upload:</strong>`;
+        container.appendChild(label);
+        container.appendChild(document.createElement('br'));
+        
+        const input = document.createElement('input');
+        input.id = `svgFile_floor_${i}`;
+        input.type = 'file';
+        input.accept = '.svg,.txt';
+        container.appendChild(input);
+        container.appendChild(document.createElement('br'));
+    }
+}
+
+// Instantiate default Ground Floor input on load
+window.addEventListener('DOMContentLoaded', updateSvgInputs);
+
+async function calculateBuildingMetrics(){
+    const numStories = parseInt(document.getElementById('numStories').value);
+    const csvFile = document.getElementById('csvFile').files[0];
+
+    if(!csvFile){
+        alert("Please select your layout CSV file.");
+        return;
+    }
+
+    const svgFiles = [];
+    for(let i = 0; i < numStories; i++){
+        const fileInput = document.getElementById(`svgFile_floor_${i}`);
+        if(!fileInput || !fileInput.files[0]){
+            alert(`Please select the SVG file for ${floorNames[i]}.`);
+            return;
+        }
+        svgFiles.push(fileInput.files[0]);
+    }
+
+    const csvText = await csvFile.text();
+    const csvData = parseCSVData(csvText);
+
+    // Initialise cross-floor aggregates
+    let aggregateTotalFloorArea = 0;
+    let aggregateWeightedHeightPool = 0;
+    const aggregateWindows = [];
+    const grandFacadeMap = {};
+
+    // Loop and process each floor structure dynamically
+    for(let i = 0; i < numStories; i++){
+        const svgText = await svgFiles[i].text();
+        const svgData = parseSVGPlan(svgText);
+        
+        // Isolate CSV entries corresponding to this floor level
+        const csvRoomsForFloor = csvData.filter(room => room.floor === i);
+        
+        const results = processStructuresAndAreas(csvRoomsForFloor, svgData);
+        
+        aggregateTotalFloorArea += results.totalFloorArea;
+        aggregateWeightedHeightPool += (results.totalFloorArea * results.avgHeight);
+        
+        results.windows.forEach(w => {
+            w.floorLabel = floorNames[i];
+            aggregateWindows.push(w);
+        });
+
+        results.facades.forEach(f => {
+            const compass = f.compassPoint;
+            if(!grandFacadeMap[compass]){
+                grandFacadeMap[compass] = {
+                    angle: f.trueAzimuth,
+                    length: 0,
+                    grossArea: 0,
+                    windowArea: 0,
+                    labelName: f.labelName
+                };
+            }
+            grandFacadeMap[compass].length += f.length;
+            grandFacadeMap[compass].grossArea += f.grossArea;
+            grandFacadeMap[compass].windowArea += f.windowArea;
+        });
+    }
+
+    const finalAvgHeight = aggregateTotalFloorArea > 0 ? (aggregateWeightedHeightPool / aggregateTotalFloorArea) : 2.90;
+
+    const finalCalculatedFacades = [];
+    for(const compassKey in grandFacadeMap){
+        finalCalculatedFacades.push({
+            labelName: grandFacadeMap[compassKey].labelName,
+            trueAzimuth: grandFacadeMap[compassKey].angle,
+            compassPoint: compassKey,
+            length: grandFacadeMap[compassKey].length,
+            grossArea: grandFacadeMap[compassKey].grossArea,
+            windowArea: grandFacadeMap[compassKey].windowArea
+        });
+    }
+    finalCalculatedFacades.sort((a, b) => parseFloat(a.trueAzimuth) - parseFloat(b.trueAzimuth));
+
+    const combinedResults = {
+        avgHeight: finalAvgHeight,
+        totalFloorArea: aggregateTotalFloorArea,
+        facades: finalCalculatedFacades,
+        windows: aggregateWindows
+    };
+
+    renderOutputs(combinedResults);
+}
+
+/* -------------------------
+   16-POINT COMPASS ROSE HELPER
+------------------------- */
+function getCompassPoint(deg) {
+    const points = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+    return points[Math.round((deg % 360) / 22.5) % 16];
+}
+
+/* -------------------------
+   CSV ATTRIBUTE BLOCK GROUPER WITH MULTI-LEVEL LOGIC
+------------------------- */
+function parseCSVData(text){
+    const lines = text.split(/\r?\n/);
+    const csvRooms = [];
+    let currentRoom = null;
+    let currentFloorIndex = 0; // Starts at Ground floor (index 0)
+
+    lines.forEach(line=>{
+        const cols = line.split(/\t|,/);
+        if(cols.length < 1) return;
+
+        const checkFloorHeader = cols[0]?.trim();
+        // Dynamically alter target floor index as headings are encountered
+        const floorMatchIndex = floorNames.indexOf(checkFloorHeader);
+        if (floorMatchIndex !== -1) {
+            currentFloorIndex = floorMatchIndex;
+            return;
+        }
+
+        if(cols.length < 9) return;
+
+        const roomName = cols[0]?.trim();
+        const wallName = cols[1]?.trim();
+        const symbol = cols[2]?.trim();
+        const width = parseFloat(cols[5]);
+        const height = parseFloat(cols[6]);
+        const type = cols[8]?.trim();
+
+        if (!roomName) return;
+
+        if (!currentRoom || currentRoom.name !== roomName || currentRoom.floor !== currentFloorIndex || (type === "Wall" && wallName === "Wall 0" && currentRoom.walls.length > 0)) {
+            currentRoom = {
+                name: roomName,
+                floor: currentFloorIndex,
+                walls: [],
+                openings: [],
+                detectedHeight: 2.90
+            };
+            csvRooms.push(currentRoom);
+        }
+
+        if(type === "Wall"){
+            currentRoom.walls.push({
+                wall: wallName,
+                width: width
+            });
+            if (!isNaN(height) && height > 0) {
+                currentRoom.detectedHeight = height;
+            }
+        } else if(type === "Window"){
+            currentRoom.openings.push({
+                wall: wallName,
+                symbol: symbol,
+                width: width,
+                height: height,
+                type: type
+            });
+        }
+    });
+
+    return csvRooms.filter(room => room.walls.length > 0);
+}
+
+/* -------------------------
+   SVG GEOMETRIC PARSER
+------------------------- */
+function getCoordsFromTransform(transform) {
+    let x = 0;
+    let y = 0;
+    let rotation = null;
+
+    if (!transform)
+        return { x, y, rotation };
+
+    if (transform.includes("matrix")) {
+        const m = transform.match(/matrix\s*\(([^)]+)\)/);
+        if (m) {
+            const p = m[1].trim().split(/[\s,]+/).map(Number);
+            if (p.length >= 6) {
+                const [a,b,c,d,tx,ty] = p;
+                x = tx;
+                y = ty;
+                rotation = (Math.atan2(b, a) * 180 / Math.PI + 360) % 360;
+            }
+        }
+    } else if (transform.includes("translate")) {
+        const t = transform.match(/translate\s*\(([^)]+)\)/);
+        if (t) {
+            const parts = t[1].trim().split(/[\s,]+/).map(Number);
+            x = parts[0];
+            y = parts[1] || 0;
+        }
+    }
+
+    return { x, y, rotation };
+}
+
+function parseSVGPlan(svgText){
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgText, "image/svg+xml"); 
+    const textNodes = [...doc.querySelectorAll("text")];
+
+    const rawLabels = [];
+    const rawSignatures = [];
+    const exteriorDimensions = [];
+
+    textNodes.forEach((node) => {
+        const txt = node.textContent.trim();
+        if(!txt) return;
+
+        if(txt.includes("WARRANTY") || txt.includes("DIMENSIONS")) return;
+
+        const transform = node.getAttribute("transform") || "";
+        const coords = getCoordsFromTransform(transform);
+
+        if(txt.includes("m²")){
+            const areaMatch = txt.match(/([0-9.]+)\s*m²/);
+            const sigMatch = txt.match(/([0-9.]+)\s*[×x]\s*([0-9.]+)/);
+            
+            rawSignatures.push({
+                area: areaMatch ? parseFloat(areaMatch[1]) : 0,
+                width: sigMatch ? parseFloat(sigMatch[1]) : null,
+                height: sigMatch ? parseFloat(sigMatch[2]) : null,
+                x: coords.x,
+                y: coords.y
+            });
+        } 
+        else if(/^[0-9]+\.[0-9]+$/.test(txt)){
+            exteriorDimensions.push({
+                value: parseFloat(txt),
+                x: coords.x,
+                y: coords.y,
+                rotation: coords.rotation
+            });
+        } 
+        else if(/[A-Za-z]/.test(txt) && !txt.includes("m²")){
+            rawLabels.push({
+                name: txt,
+                x: coords.x,
+                y: coords.y
+            });
+        }
+    });
+
+    const roomAnchors = [];
+    rawLabels.forEach(rl => {
+        const isDup = roomAnchors.some(r => r.name === rl.name && Math.hypot(r.x - rl.x, r.y - rl.y) < 30);
+        if (!isDup) {
+            roomAnchors.push(rl);
+        }
+    });
+
+    const roomsList = [];
+    roomAnchors.forEach(anchor => {
+        let bestSig = null;
+        let minSigDist = Infinity;
+
+        rawSignatures.forEach(sig => {
+            const dist = Math.hypot(sig.x - anchor.x, sig.y - anchor.y);
+            if (dist < minSigDist) {
+                minSigDist = dist;
+                bestSig = sig;
+            }
+        });
+
+        roomsList.push({
+            name: anchor.name,
+            x: anchor.x,
+            y: anchor.y,
+            floorArea: (bestSig && minSigDist < 150) ? bestSig.area : 10,
+            sigWidth: (bestSig && minSigDist < 150) ? bestSig.width : null,
+            sigHeight: (bestSig && minSigDist < 150) ? bestSig.height : null,
+            dimensions: [] 
+        });
+    });
+
+    exteriorDimensions.forEach(d => {
+        let closestRoom = null;
+        let minDist = Infinity;
+        
+        roomsList.forEach(r => {
+            let dist = Math.hypot(d.x - r.x, d.y - r.y);
+            if (dist < minDist) {
+                minDist = dist;
+                closestRoom = r;
+            }
+        });
+
+        if (closestRoom && minDist < 550) {
+            let textRotation = d.rotation;
+            if (textRotation === null) return;
+
+            const dx = d.x - closestRoom.x;
+            const dy = d.y - closestRoom.y; 
+            
+            const vectorAzimuth = (Math.atan2(dy, dx) * 180 / Math.PI + 90 + 360) % 360;
+
+            const option1 = textRotation;
+            const option2 = (textRotation + 180) % 360;
+
+            const getAngularDiff = (a, b) => Math.abs((a - b + 180) % 360 - 180);
+
+            const trueScreenAzimuth = getAngularDiff(option1, vectorAzimuth) < getAngularDiff(option2, vectorAzimuth) 
+                ? option1 
+                : option2;
+
+            closestRoom.dimensions.push({
+                value: d.value,
+                screenAzimuth: trueScreenAzimuth,
+                x: d.x,
+                y: d.y
+            });
+        }
+    });
+
+    return roomsList;
+}
+
+/* -------------------------
+   DYNAMIC AZIMUTH SELECTION ENGINE
+------------------------- */
+function processStructuresAndAreas(csvRooms, svgRooms){
+    const tolerance = 0.05;
+    const claimedSvgRooms = new Set();
+    
+    const userRotationOffset = parseFloat(document.getElementById("rotationOffset").value) || 0;
+
+    let totalWeightedHeightPool = 0;
+    let totalFloorAreaPool = 0;
+    const matchedRoomPairs = [];
+
+    csvRooms.forEach(csvRoom => {
+        const candidates = svgRooms.filter(r => r.name === csvRoom.name && !claimedSvgRooms.has(r));
+        if (candidates.length === 0) return;
+
+        let bestSvgRoom = candidates[0];
+        claimedSvgRooms.add(bestSvgRoom);
+
+        totalWeightedHeightPool += (bestSvgRoom.floorArea * csvRoom.detectedHeight);
+        totalFloorAreaPool += bestSvgRoom.floorArea;
+
+        matchedRoomPairs.push({
+            csv: csvRoom,
+            svg: bestSvgRoom,
+            height: csvRoom.detectedHeight
+        });
+    });
+
+    const areaWeightedAverageHeight = totalFloorAreaPool > 0 ? (totalWeightedHeightPool / totalFloorAreaPool) : 2.90;
+
+    const dynamicFacadeMap = {};
+    const mappedWindowsList = [];
+
+    matchedRoomPairs.forEach(pair => {
+        const csvRoom = pair.csv;
+        const bestSvgRoom = pair.svg;
+
+        const roomWallsProcessed = [];
+
+        csvRoom.walls.forEach((wallObj) => {
+            let bestDim = null;
+            let bestScore = -Infinity;
+
+            bestSvgRoom.dimensions.forEach((dim) => {
+                const lengthDiff = Math.abs(dim.value - wallObj.width);
+                if (lengthDiff > tolerance)
+                    return;
+
+                const score = 100 - (lengthDiff * 1000);
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestDim = dim;
+                }
+            });
+
+            const wallOpenings = csvRoom.openings.filter(op => op.wall === wallObj.wall);
+            const isExternal = bestDim !== null || wallOpenings.length > 0;
+
+            if (!isExternal)
+                return;
+
+            const trueAzimuth = bestDim ? ((bestDim.screenAzimuth + userRotationOffset) % 360) : userRotationOffset;
+            const compass = getCompassPoint(trueAzimuth);
+            let displayLength = bestDim ? bestDim.value : wallObj.width;
+
+            if (!dynamicFacadeMap[compass]) {
+                dynamicFacadeMap[compass] = {
+                    angle: trueAzimuth,
+                    length: 0,
+                    grossArea: 0,
+                    windowArea: 0
+                };
+            }
+
+            dynamicFacadeMap[compass].length += displayLength;
+            dynamicFacadeMap[compass].grossArea += displayLength * areaWeightedAverageHeight;
+
+            roomWallsProcessed.push({
+                wallId: wallObj.wall,
+                trueAzimuth,
+                compassPoint: compass
+            });
+        });
+
+        csvRoom.openings.forEach(winObj => {
+            const matchingWall = roomWallsProcessed.find(w => w.wallId === winObj.wall);
+            if (matchingWall) {
+                const calculatedWinArea = winObj.width * winObj.height;
+                dynamicFacadeMap[matchingWall.compassPoint].windowArea += calculatedWinArea;
+
+                mappedWindowsList.push({
+                    roomName: csvRoom.name,
+                    symbol: winObj.symbol,
+                    wallId: winObj.wall,
+                    trueBearing: `${matchingWall.trueAzimuth}°`,
+                    compassPoint: matchingWall.compassPoint,
+                    dimensions: `${winObj.width} m × ${winObj.height} m`,
+                    area: calculatedWinArea
+                });
+            }
+        });
+    });
+
+    const finalCalculatedFacades = [];
+    for(const compassKey in dynamicFacadeMap){
+        finalCalculatedFacades.push({
+            labelName: `${compassKey} FACADE ASPECT`,
+            trueAzimuth: `${dynamicFacadeMap[compassKey].angle}°`,
+            compassPoint: compassKey,
+            length: dynamicFacadeMap[compassKey].length,
+            grossArea: dynamicFacadeMap[compassKey].grossArea,
+            windowArea: dynamicFacadeMap[compassKey].windowArea
+        });
+    }
+
+    return {
+        avgHeight: areaWeightedAverageHeight,
+        totalFloorArea: totalFloorAreaPool,
+        facades: finalCalculatedFacades,
+        windows: mappedWindowsList
+    };
+}
+
+/* -------------------------
+   RENDER OUTPUT INTERFACE
+------------------------- */
+function renderOutputs(results){
+    const summaryDiv = document.getElementById("heightSummary");
+    summaryDiv.style.display = "block";
+    summaryDiv.innerHTML = `
+    <strong>Total Building Footprint Evaluated:</strong> ${results.totalFloorArea.toFixed(2)} m²<br>
+    <strong>Proportional Aggregate Area-Weighted Average Height:</strong> ${results.avgHeight.toFixed(4)} m`;
+
+    const totalsBody = document.querySelector("#totalsTable tbody");
+    totalsBody.innerHTML = "";
+
+    results.facades.forEach(f => {
+        const netSolidWallArea = Math.max(0, f.grossArea - f.windowArea);
+
+        totalsBody.innerHTML += `
+        <tr>
+            <td><strong>${f.labelName}</strong></td>
+            <td><span class="azimuth-tag">${f.trueAzimuth}</span></td>
+            <td><span class="compass-tag">${f.compassPoint}</span></td>
+            <td>${f.length.toFixed(2)} m</td>
+            <td>${f.grossArea.toFixed(2)} m²</td>
+            <td style="color: #c00;">${f.windowArea.toFixed(2)} m²</td>
+            <td class="success">${netSolidWallArea.toFixed(2)} m²</td>
+        </tr>`;
+    });
+
+    const windowBody = document.querySelector("#windowTable tbody");
+    windowBody.innerHTML = "";
+
+    if (results.windows.length === 0) {
+        windowBody.innerHTML = `<tr><td colspan="7" style="color:orange; text-align:center;">No external windows tracked along active peripheral profiles.</td></tr>`;
+    } else {
+        results.windows.forEach(win => {
+            windowBody.innerHTML += `
+            <tr>
+                <td><strong>[${win.floorLabel}] ${win.roomName}</strong></td>
+                <td>${win.symbol}</td>
+                <td>${win.wallId}</td>
+                <td><span class="azimuth-tag">${win.trueBearing}</span></td>
+                <td><span class="compass-tag">${win.compassPoint}</span></td>
+                <td>${win.dimensions}</td>
+                <td class="success">${win.area.toFixed(2)} m²</td>
+            </tr>`;
+        });
+    }
+
+    document.getElementById("debugLog").textContent = JSON.stringify(results, null, 2);
+    document.getElementById("status").innerHTML = "<p class='success'>Multi-Level Azimuth Calculations Completed Successfully!</p>";
+}
+
+</script>
+</body>
+</html>

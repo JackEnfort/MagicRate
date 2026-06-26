@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chrome Extension - Reliable Sheet Integration</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="extension-panel">
+    <h3 class="panel-title">Whole of Home Automation Plugin</h3>
+    
+    <div class="form-group">
+        <label for="address-selector">Select Property Address:</label>
+        <select id="address-selector">
+            <option value="">Loading property index rows...</option>
+        </select>
+    </div>
+    
+    <button id="btn-analyse" disabled>Analyse Selected Record</button>
+    
+    <div id="analysis-output" class="analysis-card">
+        <h4>System Matrix Analysis Output</h4>
+        
+        <div class="device-list">
+            <strong>Heating Devices Found:</strong>
+            <div id="summary-heaters"></div>
+        </div>
+        
+        <div id="heating-slider-block" class="slider-container" style="display:none;">
+            <div class="slider-labels">
+                <span id="lbl-heater1">Heater 1: 50%</span>
+                <span id="lbl-heater2">Heater 2: 50%</span>
+            </div>
+            <input type="range" id="heater-ratio" class="ratio-slider" min="0" max="100" value="50">
+        </div>
+
+        <div class="device-list">
+            <strong>Cooling Devices Found:</strong>
+            <div id="summary-coolers"></div>
+        </div>
+        
+        <div id="cooling-slider-block" class="slider-container" style="display:none;">
+            <div class="slider-labels">
+                <span id="lbl-cooler1">Cooler 1: 50%</span>
+                <span id="lbl-cooler2">Cooler 2: 50%</span>
+            </div>
+            <input type="range" id="cooling-ratio" class="ratio-slider" min="0" max="100" value="50">
+        </div>
+
+        <div class="device-list">
+            <strong>Hot Water System Found:</strong>
+            <div id="summary-hotwater"></div>
+        </div>
+        
+        <button id="btn-inject" style="background-color: #28a745;">Insert Appliance Data</button>
+    </div>
+</div>
+
+<hr style="border: 0; border-top: 1px solid #ccc; margin: 30px 0;">
+
+<div id="_WoHCard" class="main-card mb-3 card">    
+    <div class="card-header">Whole-of-home appliances</div>    
+    <div class="card-body">        
+        <div class="row">            
+            <div class="col-md-4">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceHeaterName1" class="form-label">Space heater 1</label>                    
+                    <select name="SpaceHeaterName1" id="SpaceHeaterName1" class="form-select form-control">                        
+                        <option selected value="">-- Select an option --</option>                        
+                        <option value="Ducted Natural Gas Heater">Ducted Natural Gas Heater</option>                        
+                        <option value="Non-ducted Natural Gas Heater">Non-ducted Natural Gas Heater</option>
+                        <option value="Electric Resistance Heater">Electric Resistance Heater</option>
+                        <option value="Reverse Cycle Air Conditioner - 2019 Ducted GEMS ZERL">Reverse Cycle Air Conditioner - 2019 Ducted GEMS ZERL</option>                        
+                        <option value="Reverse Cycle Air Conditioner - 2019 Non-ducted GEMS ZERL">Reverse Cycle Air Conditioner - 2019 Non-ducted GEMS ZERL</option>                        
+                        <option value="Reverse Cycle Air Conditioner - 2013 Rating Ducted inverter">Reverse Cycle Air Conditioner - 2013 Rating Ducted inverter</option>                        
+                        <option value="Reverse Cycle Air Conditioner - 2013 Rating Non-ducted inverter">Reverse Cycle Air Conditioner - 2013 Rating Non-ducted inverter</option>                        
+                        <option value="Reverse Cycle Air Conditioner - 2010 Rating Non-ducted inverter">Reverse Cycle Air Conditioner - 2010 Rating Non-ducted inverter</option>                        
+                        <option value="Reverse Cycle Air Conditioner - 2010 Rating Ducted inverter">Reverse Cycle Air Conditioner - 2010 Rating Ducted inverter</option>                        
+                    </select>                    
+                </div>            
+            </div>            
+            <div class="col-md-2">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceHeaterPerformanceRating1" class="form-label">Space heater 1 performance</label>                    
+                    <input name="SpaceHeaterPerformanceRating1" id="SpaceHeaterPerformanceRating1" class="form-control" />                    
+                </div>            
+            </div>            
+            <div class="col-md-3">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceHeaterDuctInstallationYear1" class="form-label">Space Heater 1 Duct Installation Year</label>                    
+                    <input name="SpaceHeaterDuctInstallationYear1" id="SpaceHeaterDuctInstallationYear1" class="form-control" />                    
+                </div>            
+            </div>            
+            <div class="col-md-3">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceHeaterConditionedFloorAreaPercentage1" class="form-label"> % of space heater 1 area</label>                    
+                    <input name="SpaceHeaterConditionedFloorAreaPercentage1" id="SpaceHeaterConditionedFloorAreaPercentage1" class="form-control" />                    
+                </div>            
+            </div>        
+        </div>
+        
+        <div class="row">            
+            <div class="col-md-4">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceHeaterName2" class="form-label">Space heater 2</label>                    
+                    <select name="SpaceHeaterName2" id="SpaceHeaterName2" class="form-select form-control">                        
+                        <option selected value="">-- Select an option --</option>                        
+                        <option value="Ducted Natural Gas Heater">Ducted Natural Gas Heater</option>                        
+                        <option value="Non-ducted Natural Gas Heater">Non-ducted Natural Gas Heater</option>
+                        <option value="Electric Resistance Heater">Electric Resistance Heater</option>
+                        <option value="Reverse Cycle Air Conditioner - 2013 Rating Non-ducted inverter">Reverse Cycle Air Conditioner - 2013 Rating Non-ducted inverter</option>                        
+                        <option value="Reverse Cycle Air Conditioner - 2010 Rating Non-ducted inverter">Reverse Cycle Air Conditioner - 2010 Rating Non-ducted inverter</option>                        
+                    </select>                    
+                </div>            
+            </div>            
+            <div class="col-md-2">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceHeaterPerformanceRating2" class="form-label">Space heater 2 performance</label>                    
+                    <input name="SpaceHeaterPerformanceRating2" id="SpaceHeaterPerformanceRating2" class="form-control" />                    
+                </div>            
+            </div>            
+            <div class="col-md-3">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceHeaterDuctInstallationYear2" class="form-label">Space Heater 2 Duct Installation Year</label>                    
+                    <input name="SpaceHeaterDuctInstallationYear2" id="SpaceHeaterDuctInstallationYear2" class="form-control" />                    
+                </div>            
+            </div>            
+            <div class="col-md-3">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceHeaterConditionedFloorAreaPercentage2" class="form-label">Percentage of space heater 2 area</label>                    
+                    <input name="SpaceHeaterConditionedFloorAreaPercentage2" id="SpaceHeaterConditionedFloorAreaPercentage2" class="form-control" />                    
+                </div>            
+            </div>        
+        </div>
+        
+        <div class="row">            
+            <div class="col-md-4">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceCoolerName1" class="form-label">Space cooler 1</label>                    
+                    <select name="SpaceCoolerName1" id="SpaceCoolerName1" class="form-select form-control">                        
+                        <option selected value="">-- Select an option --</option>                        
+                        <option value="Evaporative cooler - Ducted">Evaporative cooler - Ducted</option>                        
+                        <option value="Evaporative cooler - Non-ducted">Evaporative cooler - Non-ducted</option>                        
+                        <option value="Reverse Cycle Air Conditioner - 2013 Rating Non-ducted inverter">Reverse Cycle Air Conditioner - 2013 Rating Non-ducted inverter</option>                        
+                    </select>                    
+                </div>            
+            </div>            
+            <div class="col-md-2">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceCoolerPerformanceRating1" class="form-label">Space cooler 1 performance</label>                    
+                    <input name="SpaceCoolerPerformanceRating1" id="SpaceCoolerPerformanceRating1" class="form-control" />                    
+                </div>            
+            </div>            
+            <div class="col-md-3">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceCoolerDuctInstallationYear1" class="form-label">Space Cooler 1 Duct Installation Year</label>                    
+                    <input name="SpaceCoolerDuctInstallationYear1" id="SpaceCoolerDuctInstallationYear1" class="form-control" />                    
+                </div>            
+            </div>            
+            <div class="col-md-3">                
+                <div class="position-relative mb-3">                    
+                    <label for="SpaceCoolerConditionedFloorAreaPercentage1" class="form-label">Percentage of space cooler 1 area</label>                    
+                    <input name="SpaceCoolerConditionedFloorAreaPercentage1" id="SpaceCoolerConditionedFloorAreaPercentage1" class="form-control" />                    
+                </div>            
+            </div>        
+        </div>
+
+        <div class="row">            
+            <div class="col-md-9">                
+                <div class="position-relative mb-3">                    
+                    <label for="WaterHeaterType" class="form-label">Water heater</label>                    
+                    <select name="WaterHeaterType" id="WaterHeaterType" class="form-select form-control">                        
+                        <option selected value="">-- Select an option --</option>                        
+                        <option value="Natural gas storage">Natural gas storage</option>                        
+                        <option value="Heat pump">Heat pump</option>                        
+                        <option value="Solar boosted">Solar boosted</option>                        
+                        <option value="Electric storage - small pre-2005 day rate">Electric storage - small pre-2005 day rate</option>
+                        <option value="Electric storage - small pre-2005 night rate">Electric storage - small pre-2005 night rate</option>
+                        <option value="Electric storage - small post-2005 day rate">Electric storage - small post-2005 day rate</option>
+                        <option value="Electric storage - small post-2005 night rate">Electric storage - small post-2005 night rate</option>
+                        <option value="Electric storage - small MEPS 2005 day rate">Electric storage - small MEPS 2005 day rate</option>
+                        <option value="Electric storage - small MEPS 2005 night rate">Electric storage - small MEPS 2005 night rate</option>
+                        <option value="Electric storage - large pre-2005 day rate">Electric storage - large pre-2005 day rate</option>
+                        <option value="Electric storage - large pre-2005 night rate">Electric storage - large pre-2005 night rate</option>
+                        <option value="Electric storage - large post-2005 day rate">Electric storage - large post-2005 day rate</option>
+                        <option value="Electric storage - large post-2005 night rate">Electric storage - large post-2005 night rate</option>
+                        <option value="Electric storage - large MEPS 2005 day rate">Electric storage - large MEPS 2005 day rate</option>
+                        <option value="Electric storage - large MEPS 2005 night rate">Electric storage - large MEPS 2005 night rate</option>
+                    </select>                    
+                </div>            
+            </div>            
+            <div class="col-md-3">                
+                <div class="position-relative mb-3">                    
+                    <label for="WaterHeaterPerformanceRating" class="form-label">Water heater performance</label>                    
+                    <input name="WaterHeaterPerformanceRating" id="WaterHeaterPerformanceRating" class="form-control" />                    
+                </div>            
+            </div>        
+        </div>
+    </div>
+</div>
+
+<script src="constants.js"></script>
+<script src="csvParser.js"></script>
+<script src="applianceLogic.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

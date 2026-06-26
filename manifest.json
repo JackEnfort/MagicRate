@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "MagicRate",
+  "version": "0.1",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {},
+  "content_scripts": [
+    {
+      "matches": ["https://app-rapidratewebapp-prod.azurewebsites.net/*"],
+      "js": [
+        "assets/scripts/export.js",
+        "assets/scripts/sheetsExtract/constants.js",
+        "assets/scripts/sheetsExtract/csvParser.js",
+        "assets/scripts/sheetsExtract/applianceLogic.js",
+        "assets/scripts/sheetsExtract/main.js",
+        "main.js"
+]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/configFiles/currentValues.json", "editor/", "editor/index.html", "assets/templates/overlay.html"],
+      "matches": ["https://app-rapidratewebapp-prod.azurewebsites.net/*"]
+    }
+  ],
+  "permissions": [
+    "activeTab"
+  ]
+}

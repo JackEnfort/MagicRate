@@ -1,0 +1,257 @@
+{
+  "defaults": {
+    "projectType": "Existing"
+  },
+  "unconditionedRoomKeywords": ["laundry", "toilet", "bathroom", "garage"],
+  "doubleGlazingKeywords": ["double", "double.air.filled", "triple"],
+  "csvHeaders": {
+    "ceilingInsulation": "Ceiling Insulation",
+    "roomTitle": "ROOM ATTRIBUTES",
+    "roomArea": "Ground surface without walls: m²",
+    "belowFloor": "What is below the floor?",
+    "halogenCount": "How many halogen lights are there in this room?",
+    "cooktopType": "What type of cooktop is installed?",
+    "ovenType": "What type of oven is installed?",
+    "wallTitle": "Wall",
+    "wallSymbol": "Symbol",
+    "wallType": "Type",
+    "wallSurface": "Surface: m²",
+    "floorInsulation": "Floor Insulation",
+    "floorConstruction": "Floor Type",
+    "wallConstruction": "External Wall Construction",
+    "wallInsulation": "External Wall Insulation",
+    "ceilingConstruction": "Ceiling Type",
+    "insulationMaterial": "Type of batt insulation",
+    "insulationDepth": "Thickness/depth of insulation (mm)",
+    "glazingType": "Glazing Type"
+  },
+  "selectors": {
+    "postcode": "#Postcode",
+    "nccClass": "#NCCClass",
+    "projectType": "#ProjectType",
+    "siteExposure": "#SiteExposureType",
+    "floorType1": "#FloorConstructionType1",
+    "floorPercent1": "#FloorConstructionType1Percent",
+    "floorType2": "#FloorConstructionType2",
+    "floorPercent2": "#FloorConstructionType2Percent",
+    "floorType3": "#FloorConstructionType3",
+    "floorPercent3": "#FloorConstructionType3Percent",
+    "floorInsulationR": "#FloorInsulationRValue",
+    "floorAreaConditioned": "#FloorAreaConditionedM2",
+    "floorAreaUnconditioned": "#FloorAreaUnconditionedM2",
+    "floorAreaGarage": "#FloorAreaGarageM2",
+    "wallType1": "#ExternalWallConstructionType1",
+    "wallPercent1": "#ExternalWallConstructionType1Percent",
+    "wallType2": "#ExternalWallConstructionType2",
+    "wallPercent2": "#ExternalWallConstructionType2Percent",
+    "wallType3": "#ExternalWallConstructionType3",
+    "wallPercent3": "#ExternalWallConstructionType3Percent",
+    "wallInsulationR": "#ExternalWallInsulationRValue",
+    "windowDoubleAreaW": "#WindowDoubleGlazedAreaWM2",
+    "roofType": "#RoofConstructionType",
+    "ceilingInsulationR": "#CeilingInsulationRValue",
+    "roofInsulationR": "#RoofInsulationRValue",
+    "roofColour": "#_RoofColour",
+    "roofAbsorptance": "#RoofColourMeanSolarAbsorptance",
+    "spaceHeaterName1": "#SpaceHeaterName1",
+    "spaceHeaterPerf1": "#SpaceHeaterPerformanceRating1",
+    "spaceHeaterDuct1": "#SpaceHeaterDuctInstallationYear1",
+    "spaceHeaterArea1": "#SpaceHeaterConditionedFloorAreaPercentage1",
+    "spaceCoolerName1": "#SpaceCoolerName1",
+    "spaceCoolerPerf1": "#SpaceCoolerPerformanceRating1",
+    "spaceCoolerDuct1": "#SpaceCoolerDuctInstallationYear1",
+    "spaceCoolerArea1": "#SpaceCoolerConditionedFloorAreaPercentage1",
+    "waterHeaterType": "#WaterHeaterType",
+    "waterHeaterPerf": "#WaterHeaterPerformanceRating",
+    "halogenCount": "#NumberOfHalogens",
+    "cooktopName": "#CooktopName",
+    "ovenName": "#OvenName",
+    "solarSize": "#SolarPVSystemSizekW",
+    "poolArea": "#PoolSurfaceAream2",
+    "poolDepth": "#PoolAverageDepthm",
+    "poolPump": "#PoolPumpName"
+  },
+  "nccClassOptions": {
+    "house": "1a", "townhouse": "1a", "apartment": "2"
+  },
+  "projectTypeOptions": {
+    "existing": "Existing", "new": "New", "renovation": "Renovation"
+  },
+  "siteExposureOptions": {
+    "exposed": "Exposed", "open": "Open", "protected": "Protected", "suburban": "Suburban"
+  },
+  "floorConstructionOptions": {
+    "aac": "AAC",
+    "concrete": "Concrete",
+    "concrete.slab": "ConcreteSlab",
+    "concrete.suspended": "ConcreteSuspended",
+    "concrete.waffle.pod": "ConcreteWafflePod",
+    "concrete.slab.on.ground": "CSOG",
+    "plasterboard": "Plasterboard",
+    "suspended.timber": "TimberSuspended",
+    "unclassified": "Unclassified",
+    "unit.below": "UnitBelow"
+  },
+  "belowFloorOverrides": {
+    "ground": "ConcreteSlab",
+    "another.room": "UnitBelow",
+    "subfloor": "TimberSuspended"
+  },
+  "wallConstructionOptions": {
+    "brick.veneer": "BrickVeneer",
+    "brickveneer": "BrickVeneer",
+    "clad.aac": "CladAAC",
+    "clad.fibre.cement": "CladFibreCement",
+    "clad.insulated.panel": "CladInsulatedPanel", "clad.metal": "CladMetal",
+    "clad.other": "CladOther", "clad.timber": "CladTimber",
+    "clad.weatherboard": "CladWeatherboard", "weatherboard": "CladWeatherboard",
+    "concrete.block": "ConcreteBlock", "concrete.other": "ConcreteOther",
+    "concrete.panel": "ConcretePanel", "earth": "Earth",
+    "insulated.concrete.formwork": "InsulatedConcreteFormwork", "masonry.cavity": "MasonryCavity",
+    "masonry.other": "MasonryOther", "masonry.single.brick": "MasonrySingleBrick",
+    "other": "Other", "party.wall": "PartyWall", "plasterboard": "Plasterboard",
+    "retaining.wall": "RetainingWall", "reverse.brick.veneer": "ReverseBrickVeneer",
+    "strawbale": "Strawbale", "structural.insulated.panel": "StructuralInsulatedPanel"
+  },
+  "roofConstructionOptions": {
+    "plasterboard": "Ceiling",
+    "ceiling": "Ceiling", "concrete": "Concrete", "metal": "Metal",
+    "mixed": "Mixed", "none": "None", "tiles": "Tiles", "unclassified": "Unclassified"
+  },
+  "spaceHeaterOptions": {
+    "ducted.natural.gas": "Ducted Natural Gas Heater",
+    "non.ducted.natural.gas": "Non-ducted Natural Gas Heater",
+    "electric.resistance": "Electric Resistance Heater",
+    "electric.panel": "Electric panel heater",
+    "electric.floor.slab": "Electric floor slab heater",
+    "electric.ducted": "Electric ducted heater",
+    "electric.heat.bank": "Electric heat bank",
+    "heat.pump.hydronic.panel": "Heat pump hydronic - panel",
+    "heat.pump.hydronic.floor": "Heat pump hydronic - floor slab",
+    "lpg.gas": "LPG gas heater",
+    "lpg.hydronic.panel": "LPG gas hydronic - panel",
+    "lpg.hydronic.floor": "LPG gas hydronic - floor slab",
+    "natural.gas.hydronic.panel": "Natural gas hydronic - panel",
+    "natural.gas.hydronic.floor": "Natural gas hydronic - floor slab",
+    "rc.air.con.2019.ducted": "Reverse Cycle Air Conditioner - 2019 Ducted GEMS ZERL",
+    "rc.air.con.2019.non.ducted": "Reverse Cycle Air Conditioner - 2019 Non-ducted GEMS ZERL",
+    "rc.air.con.2010.non.ducted.single": "Reverse Cycle Air Conditioner - 2010 Rating Non-ducted single speed",
+    "rc.air.con.2010.non.ducted.inverter": "Reverse Cycle Air Conditioner - 2010 Rating Non-ducted inverter",
+    "rc.air.con.2010.ducted.single": "Reverse Cycle Air Conditioner - 2010 Rating Ducted single speed",
+    "rc.air.con.2010.ducted.inverter": "Reverse Cycle Air Conditioner - 2010 Rating Ducted inverter",
+    "rc.air.con.2013.non.ducted.single": "Reverse Cycle Air Conditioner - 2013 Rating Non-ducted single speed",
+    "rc.air.con.2013.non.ducted.inverter": "Reverse Cycle Air Conditioner - 2013 Rating Non-ducted inverter",
+    "rc.air.con.2013.ducted.single": "Reverse Cycle Air Conditioner - 2013 Rating Ducted single speed",
+    "rc.air.con.2013.ducted.inverter": "Reverse Cycle Air Conditioner - 2013 Rating Ducted inverter",
+    "wood.heater.slow.combustion": "Wood heater - slow combustion",
+    "wood.heater.fan.assisted": "Wood heater - slow combustion fan assisted",
+    "wood.heater.ducted": "Wood heater - ducted",
+    "wood.fireplace.open": "Wood heater - open fireplace",
+    "wood.fireplace.open.twin.flue": "Wood heater - open fireplace twin skin flue"
+  },
+  "spaceCoolerOptions": {
+    "evaporative.cooler.ducted": "Evaporative cooler - Ducted",
+    "evaporative.cooler.non.ducted": "Evaporative cooler - Non-ducted"
+  },
+  "waterHeaterOptions": {
+    "electric.instantaneous": "Electric instantaneous",
+    "electric.storage.large.2005": "Electric storage - large MEPS 2005",
+    "electric.storage.small.2005": "Electric storage - small MEPS 2005",
+    "natural.gas.storage": "Natural gas storage",
+    "natural.gas.instantaneous": "Natural gas instantaneous",
+    "heat.pump": "Heat pump",
+    "solar.thermal.electric.boost": "Solar thermal - electric boost",
+    "solar.thermal.gas.boost": "Solar thermal - natural gas boost",
+    "solid.fuel.wood": "Solid fuel - wood",
+    "lpg.storage": "LPG storage",
+    "lpg.instantaneous": "LPG instantaneous",
+    "solar.thermal.lpg.boost": "Solar thermal - LPG boost"
+  },
+  "cooktopOptions": {
+    "electric": "Electric cooktop",
+    "gas.cooktop.natural": "Gas cooktop (natural gas)",
+    "gas.cooktop.lpg": "Gas cooktop (LPG)",
+    "induction.cooktop": "Induction cooktop",
+    "gas.natural": "Gas cooktop (natural gas)"
+  },
+  "ovenOptions": {
+    "electric.oven": "Electric oven",
+    "gas.oven.natural": "Gas oven (natural gas)",
+    "gas.oven.lpg": "Gas oven (LPG)",
+    "gas.natural": "Gas oven (natural gas)"
+  },
+  "poolPumpOptions": {
+    "variable.speed": "Multi- or variable-speed",
+    "single.speed": "Single-speed",
+    "two.speed": "Two-speed"
+  },
+  "hvacDefaults": {
+    "spaceHeaterName": "Reverse Cycle Air Conditioner - 2013 Rating Non-ducted inverter",
+    "spaceCoolerName": "Reverse Cycle Air Conditioner - 2013 Rating Non-ducted inverter",
+    "heaterCoveragePercent": "100",
+    "coolerCoveragePercent": "100"
+  },
+  "wallOrientations": {
+    "Wall 0": "N", "Wall 1": "E", "Wall 2": "S", "Wall 3": "W",
+    "Wall 4": "W", "Wall 5": "W", "Wall 6": "W", "Wall 7": "W"
+  },
+  "wallOrientationOrder": ["N", "E", "S", "W"],
+  "insulationMatrix": {
+    "glass.fibre": [
+      { "t": 57, "r": "1.0" }, { "t": 86, "r": "1.5" }, { "t": 114, "r": "2.0" }, 
+      { "t": 143, "r": "2.5" }, { "t": 165, "r": "3.0" }, { "t": 190, "r": "3.5" }, { "t": 210, "r": "4.0" }
+    ],
+    "cellulose.fibre": [
+      { "t": 40, "r": "1.0" }, { "t": 60, "r": "1.5" }, { "t": 80, "r": "2.0" }, 
+      { "t": 100, "r": "2.5" }, { "t": 120, "r": "3.0" }, { "t": 140, "r": "3.5" }, { "t": 160, "r": "4.0" }
+    ],
+    "polyethylene.foam": [
+      { "t": 40, "r": "1.0" }, { "t": 60, "r": "1.5" }, { "t": 80, "r": "2.0" }, 
+      { "t": 100, "r": "2.5" }, { "t": 120, "r": "3.0" }, { "t": 140, "r": "3.5" }, { "t": 160, "r": "4.0" }
+    ],
+    "polyester": [
+      { "t": 63, "r": "1.0" }, { "t": 95, "r": "1.5" }, { "t": 126, "r": "2.0" }, 
+      { "t": 158, "r": "2.5" }, { "t": 185, "r": "3.0" }, { "t": 210, "r": "3.5" }, { "t": 235, "r": "4.0" }
+    ],
+    "polystyrene.(expanded)": [
+      { "t": 39, "r": "1.0" }, { "t": 59, "r": "1.5" }, { "t": 78, "r": "2.0" }, 
+      { "t": 98, "r": "2.5" }, { "t": 117, "r": "3.0" }, { "t": 137, "r": "3.5" }, { "t": 156, "r": "4.0" }
+    ],
+    "polystyrene.expanded": [
+      { "t": 39, "r": "1.0" }, { "t": 59, "r": "1.5" }, { "t": 78, "r": "2.0" }, 
+      { "t": 98, "r": "2.5" }, { "t": 117, "r": "3.0" }, { "t": 137, "r": "3.5" }, { "t": 156, "r": "4.0" }
+    ],
+    "polystyrene.(extruded)": [
+      { "t": 28, "r": "1.0" }, { "t": 42, "r": "1.5" }, { "t": 56, "r": "2.0" }, 
+      { "t": 70, "r": "2.5" }, { "t": 84, "r": "3.0" }, { "t": 98, "r": "3.5" }, { "t": 112, "r": "4.0" }
+    ],
+    "polystyrene.extruded": [
+      { "t": 28, "r": "1.0" }, { "t": 42, "r": "1.5" }, { "t": 56, "r": "2.0" }, 
+      { "t": 70, "r": "2.5" }, { "t": 84, "r": "3.0" }, { "t": 98, "r": "3.5" }, { "t": 112, "r": "4.0" }
+    ],
+    "polyurethane.rigid.foam": [
+      { "t": 28, "r": "1.0" }, { "t": 42, "r": "1.5" }, { "t": 56, "r": "2.0" }, 
+      { "t": 70, "r": "2.5" }, { "t": 84, "r": "3.0" }, { "t": 98, "r": "3.5" }, { "t": 112, "r": "4.0" }
+    ],
+    "rockwool.loose.fill": [
+      { "t": 40, "r": "1.0" }, { "t": 60, "r": "1.5" }, { "t": 80, "r": "2.0" }, 
+      { "t": 100, "r": "2.5" }, { "t": 120, "r": "3.0" }, { "t": 140, "r": "3.5" }, { "t": 160, "r": "4.0" }
+    ],
+    "rockwool.batt": [
+      { "t": 33, "r": "1.0" }, { "t": 50, "r": "1.5" }, { "t": 66, "r": "2.0" }, 
+      { "t": 83, "r": "2.5" }, { "t": 99, "r": "3.0" }, { "t": 116, "r": "3.5" }, { "t": 132, "r": "4.0" }
+    ],
+    "wool.loose.fill": [
+      { "t": 80, "r": "1.0" }, { "t": 120, "r": "1.5" }, { "t": 160, "r": "2.0" }, 
+      { "t": 200, "r": "2.5" }, { "t": 240, "r": "3.0" }, { "t": 280, "r": "3.5" }, { "t": 320, "r": "4.0" }
+    ],
+    "wool/polyester.batt": [
+      { "t": 59, "r": "1.0" }, { "t": 89, "r": "1.5" }, { "t": 118, "r": "2.0" }, 
+      { "t": 148, "r": "2.5" }, { "t": 177, "r": "3.0" }, { "t": 207, "r": "3.5" }, { "t": 236, "r": "4.0" }
+    ],
+    "wool.polyester.batt": [
+      { "t": 59, "r": "1.0" }, { "t": 89, "r": "1.5" }, { "t": 118, "r": "2.0" }, 
+      { "t": 148, "r": "2.5" }, { "t": 177, "r": "3.0" }, { "t": 207, "r": "3.5" }, { "t": 236, "r": "4.0" }
+    ]
+  }
+}
