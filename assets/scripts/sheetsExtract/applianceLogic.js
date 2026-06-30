@@ -203,8 +203,8 @@ function mapToFormValues(extractedData) {
         let formName = "Natural gas storage";
         let performanceRating = "";
 
-        if (lower.includes("gas")) {
-            formName = "Natural gas storage";
+        if (lower.includes("instant") || lower.includes("instantaneous")) {
+            formName = "Natural gas instantaneous";
             performanceRating = extractedData.hotwater.gasStar;
         } else if (lower.includes("heat pump") || lower.includes("hphws")) {
             formName = "Heat pump";
@@ -212,8 +212,7 @@ function mapToFormValues(extractedData) {
         } else if (lower.includes("solar")) {
             formName = "Solar boosted";
             performanceRating = extractedData.hotwater.solarStp;
-        } 
-        else if (lower.includes("electric storage")) {
+        } else if (lower.includes("electric storage")) {
             let sizeToken = "large";
             let rawSize = extractedData.hotwater.size.toLowerCase();
             if (rawSize.includes("small") || (parseInt(rawSize) > 0 && parseInt(rawSize) <= 150)) {
@@ -233,7 +232,10 @@ function mapToFormValues(extractedData) {
             }
 
             formName = `Electric storage - ${sizeToken} ${mepsToken} ${tariffToken}`;
-            performanceRating = ""; 
+            performanceRating = "";
+        } else if (lower.includes("gas")) {
+            formName = "Natural gas storage";
+            performanceRating = extractedData.hotwater.gasStar;
         }
 
         payload.hotwater = { formName, rating: performanceRating };

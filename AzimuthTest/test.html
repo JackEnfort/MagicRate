@@ -399,24 +399,30 @@ function getCoordsFromTransform(transform) {
     if (!transform)
         return { x, y, rotation };
 
-    if (transform.includes("matrix")) {
-        const m = transform.match(/matrix\s*\(([^)]+)\)/);
-        if (m) {
-            const p = m[1].trim().split(/[\s,]+/).map(Number);
-            if (p.length >= 6) {
-                const [a,b,c,d,tx,ty] = p;
-                x = tx;
-                y = ty;
-                rotation = (Math.atan2(b, a) * 180 / Math.PI + 360) % 360;
-            }
+    const matrixMatch = transform.match(/matrix\s*\(([^)]+)\)/);
+    if (matrixMatch) {
+        const p = matrixMatch[1].trim().split(/[\s,]+/).map(Number);
+        if (p.length >= 6) {
+            const [a,b,c,d,tx,ty] = p;
+            x = tx;
+            y = ty;
+            rotation = (Math.atan2(b, a) * 180 / Math.PI + 360) % 360;
+            return { x, y, rotation };
         }
-    } else if (transform.includes("translate")) {
-        const t = transform.match(/translate\s*\(([^)]+)\)/);
-        if (t) {
-            const parts = t[1].trim().split(/[\s,]+/).map(Number);
-            x = parts[0];
-            y = parts[1] || 0;
-        }
+    }
+
+    const translateMatch = transform.match(/translate\s*\(([^)]+)\)/);
+    if (translateMatch) {
+        const parts = translateMatch[1].trim().split(/[\s,]+/).map(Number);
+        x = parts[0] || 0;
+        y = parts[1] || 0;
+    }
+
+    const rotateMatch = transform.match(/rotate\s*\(([^)]+)\)/);
+    if (rotateMatch) {
+        rotation = parseFloat(rotateMatch[1]);
+        if (isNaN(rotation)) rotation = null;
+        else rotation = (rotation + 360) % 360;
     }
 
     return { x, y, rotation };
@@ -490,10 +496,15 @@ function parseSVGPlan(svgText){
             }
         });
 
+        const centerX = bestSig && minSigDist < 150 ? (anchor.x + bestSig.x) / 2 : anchor.x;
+        const centerY = bestSig && minSigDist < 150 ? (anchor.y + bestSig.y) / 2 : anchor.y;
+
         roomsList.push({
             name: anchor.name,
             x: anchor.x,
             y: anchor.y,
+            centerX,
+            centerY,
             floorArea: (bestSig && minSigDist < 150) ? bestSig.area : 10,
             sigWidth: (bestSig && minSigDist < 150) ? bestSig.width : null,
             sigHeight: (bestSig && minSigDist < 150) ? bestSig.height : null,
@@ -506,7 +517,7 @@ function parseSVGPlan(svgText){
         let minDist = Infinity;
         
         roomsList.forEach(r => {
-            let dist = Math.hypot(d.x - r.x, d.y - r.y);
+            let dist = Math.hypot(d.x - r.centerX, d.y - r.centerY);
             if (dist < minDist) {
                 minDist = dist;
                 closestRoom = r;
@@ -517,19 +528,34 @@ function parseSVGPlan(svgText){
             let textRotation = d.rotation;
             if (textRotation === null) return;
 
-            const dx = d.x - closestRoom.x;
-            const dy = d.y - closestRoom.y; 
-            
+            const dx = d.x - closestRoom.centerX;
+            const dy = d.y - closestRoom.centerY;
+
             const vectorAzimuth = (Math.atan2(dy, dx) * 180 / Math.PI + 90 + 360) % 360;
 
             const option1 = textRotation;
             const option2 = (textRotation + 180) % 360;
 
             const getAngularDiff = (a, b) => Math.abs((a - b + 180) % 360 - 180);
+            const getAzimuthQuadrant = (angle) => {
+                const normalized = (angle + 360) % 360;
+                if (normalized >= 45 && normalized < 135) return 'E';
+                if (normalized >= 135 && normalized < 225) return 'S';
+                if (normalized >= 225 && normalized < 315) return 'W';
+                return 'N';
+            };
 
-            const trueScreenAzimuth = getAngularDiff(option1, vectorAzimuth) < getAngularDiff(option2, vectorAzimuth) 
-                ? option1 
-                : option2;
+            const diff1 = getAngularDiff(option1, vectorAzimuth);
+            const diff2 = getAngularDiff(option2, vectorAzimuth);
+            let trueScreenAzimuth = diff1 < diff2 ? option1 : option2;
+            if (Math.abs(diff1 - diff2) < 1e-6) {
+                const preferredQuadrant = getAzimuthQuadrant(vectorAzimuth);
+                if (getAzimuthQuadrant(option2) === preferredQuadrant) {
+                    trueScreenAzimuth = option2;
+                } else if (getAzimuthQuadrant(option1) === preferredQuadrant) {
+                    trueScreenAzimuth = option1;
+                }
+            }
 
             closestRoom.dimensions.push({
                 value: d.value,

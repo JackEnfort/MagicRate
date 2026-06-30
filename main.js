@@ -60,7 +60,7 @@ async function toggleMagicPlanOverlay() {
     position: 'fixed', top: '20px', right: '20px', zIndex: '100000',
     backgroundColor: '#ffffff', padding: '20px', border: '3px solid #2575fc',
     borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-    fontFamily: 'Arial, sans-serif', width: '340px', color: '#333',
+    fontFamily: 'Arial, sans-serif', width: '440px', color: '#333',
     maxHeight: '90vh', overflowY: 'auto', display: 'block'
   });
 
@@ -425,16 +425,18 @@ function fillOriginalAutomationFields(data) {
     }
   });
 
-  if (floor[window.AUTOMATION_CONFIG.csvHeaders.floorInsulation]) {
-    setInputValue(selectors.floorInsulationR, floor[window.AUTOMATION_CONFIG.csvHeaders.floorInsulation].replace(/[^\d.]/g, ''));
-  }
+  const rawFloorInsulation = floor[window.AUTOMATION_CONFIG.csvHeaders.floorInsulation];
+  const cleanFloorInsulation = normalizeInsulationValue(rawFloorInsulation);
+  setInputValue(selectors.floorInsulationR, cleanFloorInsulation);
 
   // --- F. STRUCTURAL LOOKUPS ---
   if (floor[window.AUTOMATION_CONFIG.csvHeaders.wallConstruction]) {
     const val = window.AUTOMATION_CONFIG.wallConstructionOptions[floor[window.AUTOMATION_CONFIG.csvHeaders.wallConstruction].toLowerCase()];
     if (val) { selectDropdownByValue(document.querySelector(selectors.wallType1), val); setInputValue(selectors.wallPercent1, '100'); }
   }
-  if (floor[window.AUTOMATION_CONFIG.csvHeaders.wallInsulation]) setInputValue(selectors.wallInsulationR, floor[window.AUTOMATION_CONFIG.csvHeaders.wallInsulation].replace(/[^\d.]/g, ''));
+  const rawWallInsulation = floor[window.AUTOMATION_CONFIG.csvHeaders.wallInsulation];
+  const cleanWallInsulation = normalizeInsulationValue(rawWallInsulation);
+  setInputValue(selectors.wallInsulationR, cleanWallInsulation);
   
   if (floor[window.AUTOMATION_CONFIG.csvHeaders.ceilingConstruction]) {
     const val = window.AUTOMATION_CONFIG.roofConstructionOptions[floor[window.AUTOMATION_CONFIG.csvHeaders.ceilingConstruction].toLowerCase()];
@@ -445,8 +447,8 @@ function fillOriginalAutomationFields(data) {
   let finalCeilingR = null;
 
   if (directCeilingIns && !directCeilingIns.toLowerCase().includes('visual')) {
-    const cleanR = directCeilingIns.replace(/[^\d.]/g, '');
-    if (cleanR && !isNaN(parseFloat(cleanR))) finalCeilingR = parseFloat(cleanR).toFixed(1);
+    const cleanR = normalizeInsulationValue(directCeilingIns);
+    if (cleanR) finalCeilingR = parseFloat(cleanR).toFixed(1);
   }
   if (!finalCeilingR) {
     const mat = floor[window.AUTOMATION_CONFIG.csvHeaders.insulationMaterial];
@@ -724,6 +726,12 @@ function setInputValue(selector, value) {
   }
 }
 
+function normalizeInsulationValue(raw) {
+  if (!raw) return '';
+  const cleaned = raw.toString().replace(/[^\d.]/g, '').trim();
+  if (!cleaned || cleaned === '.' || isNaN(parseFloat(cleaned))) return '';
+  return cleaned;
+}
 function selectDropdownByValue(el, val) {
   if (!el) return;
   el.value = val;
