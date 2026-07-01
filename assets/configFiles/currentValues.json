@@ -196,6 +196,7 @@
   },
   "waterHeaterOptions": {
     "electric.instantaneous": "Electric instantaneous",
+    "Electric.Storage": "Electric storage - large MEPS 2005",
     "electric.storage.large.2005": "Electric storage - large MEPS 2005",
     "electric.storage.small.2005": "Electric storage - small MEPS 2005",
     "natural.gas.storage": "Natural gas storage",

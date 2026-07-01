@@ -626,18 +626,21 @@ function fillOriginalAutomationFields(data) {
   if (rawSolarSize) setInputValue(selectors.solarSize, normalizeInsulationValue(rawSolarSize));
 
   const rawPoolArea = getConfiguredValue(plan, 'poolAreaPlan');
-  if (rawPoolArea) setInputValue(selectors.poolArea, normalizeInsulationValue(rawPoolArea));
+    if (rawPoolArea) setInputValue(selectors.poolArea, normalizeInsulationValue(rawPoolArea));
 
   const rawPoolVolume = getConfiguredValue(plan, 'poolVolumePlan');
   if (rawPoolVolume) setInputValue(selectors.poolVolume, normalizeInsulationValue(rawPoolVolume));
 
-  const poolDepthValue = normalizeInsulationValue(getConfiguredValue(plan, 'poolDepthPlan')) || '1';
+  // Dynamic fallback: If depth is missing, check if rawPoolVolume exists. 
+  // If volume exists, default to '1'. If volume is empty, default to null.
+  const poolDepthValue = normalizeInsulationValue(getConfiguredValue(plan, 'poolDepthPlan')) || (rawPoolVolume ? '1' : null);
+  
   if (poolDepthValue) setInputValue(selectors.poolDepth, poolDepthValue);
 
   const rawPoolPump = getConfiguredValue(plan, 'poolPumpPlan');
   if (rawPoolPump) {
     const mappedPoolPump = mapOptionValue(rawPoolPump, config.poolPumpOptions);
-    if (mappedPoolPump) setSelectValueByText(selectors.poolPump, mappedPoolPump);
+    if (mappedPoolPump) setInputValue(selectors.poolPump, mappedPoolPump);
   }
 
   const rawRoofColour = getConfiguredValue(floor, 'roofColourPlan');
