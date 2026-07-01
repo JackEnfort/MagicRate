@@ -154,11 +154,6 @@ onElementReady('btn-inject', (btnInject) => {
         });
     }
 
-    if (payload.hotwater) {
-        write('WaterHeaterType', payload.hotwater.formName);
-        write('WaterHeaterPerformanceRating', payload.hotwater.rating);
-    }
-
     if (payload.pool) {
         write('PoolSurfaceAream2', payload.pool.area.toFixed(2));
         write('PoolAverageDepthm', payload.pool.depth.toFixed(2));
@@ -271,7 +266,7 @@ function clearFormTargetFields() {
         'SpaceHeaterName2', 'SpaceHeaterPerformanceRating2', 'SpaceHeaterDuctInstallationYear2', 'SpaceHeaterConditionedFloorAreaPercentage2',
         'SpaceCoolerName1', 'SpaceCoolerPerformanceRating1', 'SpaceCoolerDuctInstallationYear1', 'SpaceCoolerConditionedFloorAreaPercentage1',
         'SpaceCoolerName2', 'SpaceCoolerPerformanceRating2', 'SpaceCoolerDuctInstallationYear2', 'SpaceCoolerConditionedFloorAreaPercentage2',
-        'WaterHeaterType', 'WaterHeaterPerformanceRating', 'PoolSurfaceAream2', 'PoolAverageDepthm', 'PoolVolume',
+        'PoolSurfaceAream2', 'PoolAverageDepthm', 'PoolVolume',
         '_RoofColour', 'RoofColourMeanSolarAbsorptance', 'SolarPVSystemSizekW', 'PoolPumpName'
     ];
     fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });

@@ -5,10 +5,11 @@
   "unconditionedRoomKeywords": ["laundry", "toilet", "bathroom", "garage"],
   "doubleGlazingKeywords": ["double", "double.air.filled", "triple"],
   "csvHeaders": {
-    "ceilingInsulation": "Ceiling Insulation",
+    "ceilingInsulation": "Ceiling insulation thickness (mm)",
+    "ceilingInsulationType": "Ceiling insulation type",
     "roomTitle": "ROOM ATTRIBUTES",
     "roomArea": "Ground surface without walls: m²",
-    "belowFloor": "What is below the floor?",
+    "belowFloor": "What is below the majority of this floor?",
     "halogenCount": "How many halogen lights are there in this room?",
     "cooktopType": "What type of cooktop is installed?",
     "ovenType": "What type of oven is installed?",
@@ -16,14 +17,26 @@
     "wallSymbol": "Symbol",
     "wallType": "Type",
     "wallSurface": "Surface: m²",
-    "floorInsulation": "Floor Insulation",
-    "floorConstruction": "Floor Type",
-    "wallConstruction": "External Wall Construction",
-    "wallInsulation": "External Wall Insulation",
-    "ceilingConstruction": "Ceiling Type",
-    "insulationMaterial": "Type of batt insulation",
-    "insulationDepth": "Thickness/depth of insulation (mm)",
-    "glazingType": "Glazing Type"
+    "floorInsulation": "R-value",
+    "floorConstruction": "Construction",
+    "wallConstruction": "Construction",
+    "wallInsulation": "Insulation value",
+    "ceilingConstruction": "Roof construction",
+    "insulationMaterial": "Ceiling insulation type",
+    "insulationDepth": "Ceiling insulation thickness (mm)",
+    "glazingType": "Glazing type",
+    "projectTypePlan": "Project type",
+    "nccClassPlan": "Building class?",
+    "siteExposurePlan": "Exposure type?",
+    "waterHeaterTypePlan": "System type",
+    "waterHeaterPerfPlan": "Efficiency",
+    "solarSizePlan": "Input documented value (kW)",
+    "poolAreaPlan": "What is the area of the pool and/or spa (m²)?",
+    "poolVolumePlan": ["What is the volume of the pool and/or spa (m³)?", "Pool volume"],
+    "poolDepthPlan": ["What is the average depth of the pool and/or spa (m)?", "Pool average depth"],
+    "poolPumpPlan": "What is the pump type?",
+    "roofColourPlan": "Roof colour",
+    "roofSarkingPlan": "Is there reflective sarking under the roof?"
   },
   "selectors": {
     "postcode": "#Postcode",
@@ -68,6 +81,7 @@
     "ovenName": "#OvenName",
     "solarSize": "#SolarPVSystemSizekW",
     "poolArea": "#PoolSurfaceAream2",
+    "poolVolume": "#PoolVolume",
     "poolDepth": "#PoolAverageDepthm",
     "poolPump": "#PoolPumpName"
   },
@@ -79,6 +93,23 @@
   },
   "siteExposureOptions": {
     "exposed": "Exposed", "open": "Open", "protected": "Protected", "suburban": "Suburban"
+  },
+  "roofColourAbsorptanceValues": {
+    "dark": "1",
+    "medium": "0.5",
+    "light": "0.1"
+  },
+  "roofColourOptions": {
+    "dark": "0.91",
+    "black": "0.91",
+    "brown": "0.85",
+    "medium": "0.65",
+    "light": "0.23",
+    "white": "0.23",
+    "cream": "0.30",
+    "green": "0.50",
+    "grey": "0.75",
+    "red": "0.66"
   },
   "floorConstructionOptions": {
     "aac": "AAC",

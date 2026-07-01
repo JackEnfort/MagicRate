@@ -253,12 +253,14 @@ async function runAutomation() {
       const metrics = grandFacadeMap[cp];
       if (metrics.grossArea > 0 || metrics.windowArea > 0) {
         const netSolidWallArea = Math.max(0, metrics.grossArea - metrics.windowArea);
+        const totalWindowArea = metrics.windowArea.toFixed(2);
+
         setInputValue(`#ExternalWallArea${cp}M2`, netSolidWallArea.toFixed(2));
+        setInputValue(`#WindowArea${cp}M2`, totalWindowArea);
+
         if (isDoubleGlazed) {
-          setInputValue(`#WindowDoubleGlazedArea${cp}M2`, metrics.windowArea.toFixed(2));
-          setInputValue(`#WindowArea${cp}M2`, "0.00");
+          setInputValue(`#WindowDoubleGlazedArea${cp}M2`, totalWindowArea);
         } else {
-          setInputValue(`#WindowArea${cp}M2`, metrics.windowArea.toFixed(2));
           setInputValue(`#WindowDoubleGlazedArea${cp}M2`, "0.00");
         }
       }
@@ -290,11 +292,14 @@ function stitchBrokenMagicplanLines(rawText) {
   let lines = rawText.split(/\r?\n/);
   let stitchedLines = [];
   const validStarters = [
-    "plan attributes", "floor attributes", "room attributes", "wall attributes", 
+    "plan attributes", "floor attributes", "room attributes", "wall attributes",
     "affected areas", "object count", "object attributes",
     "ground floor", "first floor", "second floor", "roof space", "outdoors", "plan",
     "toilet", "laundry", "study", "living", "bedroom", "bathroom", "hallway", "kitchen", "hall",
-    "existing homes", "appliances", "doors", "electrical", "furniture", "hvac", "plumbing", "windows"
+    "existing homes", "appliances", "doors", "electrical", "furniture", "hvac", "plumbing", "windows",
+    "what type of cooktop", "what type of oven", "system type", "efficiency", "building class",
+    "exposure type", "what is the area of the pool", "what is the pump type", "roof colour",
+    "is there reflective sarking", "input documented value"
   ];
   for (let i = 0; i < lines.length; i++) {
     let currentLine = lines[i].trim();
@@ -320,6 +325,31 @@ function parseCSVWithQuotes(text) {
   }).filter(line => line.length > 1 || line[0] !== "");
 }
 
+function setHeaderValue(target, headerName, value) {
+  if (!headerName) return;
+  const cleanValue = value === undefined || value === null ? '' : String(value).trim();
+  if (!cleanValue) return;
+
+  if (target[headerName] === undefined) {
+    target[headerName] = cleanValue;
+  } else if (Array.isArray(target[headerName])) {
+    target[headerName].push(cleanValue);
+  } else {
+    target[headerName] = [target[headerName], cleanValue];
+  }
+}
+
+function getHeaderValue(target, headerName, options = {}) {
+  if (!target || !headerName) return '';
+  const rawValue = target[headerName];
+  if (Array.isArray(rawValue)) {
+    const values = rawValue.filter(v => v !== undefined && v !== null && String(v).trim() !== '');
+    if (!values.length) return '';
+    return options.preferLast ? values[values.length - 1] : values[0];
+  }
+  return rawValue || '';
+}
+
 function parseMagicplanBlocks(text) {
   const lines = parseCSVWithQuotes(text);
   const data = { planAttributes: {}, floorAttributes: {}, roomAttributes: [], wallAttributes: [], objectCount: {} };
@@ -334,7 +364,7 @@ function parseMagicplanBlocks(text) {
     if (row[0].includes('Object Attributes') || row[0].includes('AFFECTED AREAS')) { section = 'ignored'; continue; }
 
     if (section === 'plan' && row[0] && row[1]) data.planAttributes[row[0].replace(':', '').trim()] = row[1];
-    else if (section === 'floor') headers.forEach((h, i) => { if (h) data.floorAttributes[h] = row[i] || ''; });
+    else if (section === 'floor') headers.forEach((h, i) => { if (h) setHeaderValue(data.floorAttributes, h, row[i] || ''); });
     else if (section === 'room' && !(row[0].toLowerCase().includes('floor') && !row[1])) {
       let obj = {}; headers.forEach((h, i) => { if (h) obj[h] = row[i] || ''; });
       if (obj[window.AUTOMATION_CONFIG.csvHeaders.roomTitle]) data.roomAttributes.push(obj);
@@ -351,12 +381,26 @@ function parseMagicplanBlocks(text) {
   return data;
 }
 
+function normalizeInsulationMaterialKey(material) {
+  if (!material) return '';
+  const normalized = material.toLowerCase().trim().replace(/\s+/g, '.').replace(/[^a-z0-9.]+/g, '.');
+  const candidates = [normalized];
+  if (normalized.startsWith('batt.')) candidates.push(normalized.replace(/^batt\./, ''));
+  if (normalized.includes('glass.fibre')) candidates.push('glass.fibre');
+  if (normalized.includes('rockwool')) candidates.push(normalized.replace(/\.batt$/, ''));
+
+  for (const candidate of candidates) {
+    if (window.AUTOMATION_CONFIG?.insulationMatrix?.[candidate]) return candidate;
+  }
+  return normalized;
+}
+
 function lookupConfigInsulationRValue(material, thickness) {
   if (!material || !thickness) return null;
-  let key = material.toLowerCase().trim().replace(/\s+/g, '.');
-  const entries = window.AUTOMATION_CONFIG.insulationMatrix[key];
+  const key = normalizeInsulationMaterialKey(material);
+  const entries = window.AUTOMATION_CONFIG?.insulationMatrix?.[key];
   if (!entries) return null;
-  let selectedEntry = entries[0]; 
+  let selectedEntry = entries[0];
   for (let i = 0; i < entries.length; i++) {
     if (thickness >= entries[i].t) selectedEntry = entries[i];
   }
@@ -367,17 +411,111 @@ function lookupConfigInsulationRValue(material, thickness) {
    ADAPTED FROM-FILL ENGINE (PRESERVING SECTIONS A, B, D, E, F)
 ------------------------- */
 function fillOriginalAutomationFields(data) {
-  const floor = data.floorAttributes, rooms = data.roomAttributes, walls = data.wallAttributes, objects = data.objectCount;
+  const floor = data.floorAttributes || {};
+  const rooms = data.roomAttributes || [];
+  const objects = data.objectCount || {};
+  const plan = data.planAttributes || {};
   const selectors = window.AUTOMATION_CONFIG.selectors;
+  const config = window.AUTOMATION_CONFIG;
 
-  setInputValue(selectors.projectType, window.AUTOMATION_CONFIG.defaults.projectType);
+  const getConfiguredValue = (source, key, options = {}) => {
+    if (!source) return '';
+
+    const headerNames = config.csvHeaders?.[key];
+    const candidates = Array.isArray(headerNames) ? headerNames : [headerNames].filter(Boolean);
+    if (!candidates.length) return '';
+
+    for (const headerName of candidates) {
+      const value = getHeaderValue(source, headerName, options);
+      if (value !== '') return value;
+    }
+
+    return '';
+  };
+
+  const normalizeOptionKey = (value) => (value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const mapOptionValue = (rawValue, optionMap) => {
+    if (!rawValue || !optionMap) return null;
+    const normalized = normalizeOptionKey(rawValue);
+    if (optionMap[normalized]) return optionMap[normalized];
+
+    for (const [key, val] of Object.entries(optionMap)) {
+      const optionKey = normalizeOptionKey(key);
+      if (normalized === optionKey || normalized.includes(optionKey) || optionKey.includes(normalized)) {
+        return val;
+      }
+    }
+
+    if (normalized.includes('gas') && normalized.includes('instant')) {
+      return optionMap['natural.gas.instantaneous'] || null;
+    }
+    if (normalized.includes('gas') && normalized.includes('storage')) {
+      return optionMap['natural.gas.storage'] || null;
+    }
+    if (normalized.includes('induction')) {
+      return optionMap['induction.cooktop'] || null;
+    }
+    if (normalized.includes('multi') && normalized.includes('speed')) {
+      return optionMap['variable.speed'] || null;
+    }
+
+    return null;
+  };
+
+  const setDropdownValue = (selector, value) => {
+    if (!value) return;
+    const el = document.querySelector(selector);
+    if (el) selectDropdownByValue(el, value);
+  };
+
+  const setSelectValueByText = (selector, value) => {
+    if (!value) return;
+    const el = document.querySelector(selector);
+    if (!el || el.tagName !== 'SELECT') return;
+
+    const normalizedTarget = normalizeOptionKey(value);
+    const matchingOption = Array.from(el.options).find((option) => {
+      const optionValue = normalizeOptionKey(option.value || '');
+      const optionText = normalizeOptionKey(option.textContent || '');
+      return optionValue === normalizedTarget || optionText === normalizedTarget;
+    });
+
+    if (matchingOption) {
+      selectDropdownByValue(el, matchingOption.value);
+    } else {
+      selectDropdownByValue(el, value);
+    }
+  };
+
+  setInputValue(selectors.projectType, config.defaults.projectType);
+
+  const planProjectType = getConfiguredValue(plan, 'projectTypePlan');
+  if (planProjectType) {
+    const mappedProjectType = mapOptionValue(planProjectType, config.projectTypeOptions);
+    if (mappedProjectType) setDropdownValue(selectors.projectType, mappedProjectType);
+  }
+
+  const rawNccClass = getConfiguredValue(plan, 'nccClassPlan');
+  if (rawNccClass) {
+    const normalizedNcc = normalizeOptionKey(rawNccClass);
+    let mappedNcc = null;
+    if (normalizedNcc.includes('apartment')) mappedNcc = '2';
+    else if (normalizedNcc.includes('townhouse') || normalizedNcc.includes('house')) mappedNcc = '1a';
+    if (mappedNcc) setSelectValueByText(selectors.nccClass, mappedNcc);
+  }
+
+  const rawExposure = getConfiguredValue(plan, 'siteExposurePlan');
+  if (rawExposure) {
+    const mappedExposure = mapOptionValue(rawExposure, config.siteExposureOptions);
+    if (mappedExposure) setSelectValueByText(selectors.siteExposure, mappedExposure);
+  }
 
   // --- A. AREA SUMMARY CALCULATOR ---
   let conditionedArea = 0, unconditionedArea = 0;
   rooms.forEach(room => {
-    const name = room[window.AUTOMATION_CONFIG.csvHeaders.roomTitle].toLowerCase();
-    const areaNum = parseFloat(room[window.AUTOMATION_CONFIG.csvHeaders.roomArea]) || 0;
-    const isUnconditioned = window.AUTOMATION_CONFIG.unconditionedRoomKeywords.some(kw => name.includes(kw.toLowerCase()));
+    const name = (room[config.csvHeaders.roomTitle] || '').toLowerCase();
+    const areaNum = parseFloat(room[config.csvHeaders.roomArea]) || 0;
+    const isUnconditioned = config.unconditionedRoomKeywords.some(kw => name.includes(kw.toLowerCase()));
     if (isUnconditioned) unconditionedArea += areaNum; else conditionedArea += areaNum;
   });
   setInputValue(selectors.floorAreaConditioned, conditionedArea.toFixed(2));
@@ -386,30 +524,38 @@ function fillOriginalAutomationFields(data) {
   // --- D. LIGHTING & APPLIANCE MAPPER ---
   let halogenCount = 0;
   rooms.forEach(room => {
-    halogenCount += parseInt(room[window.AUTOMATION_CONFIG.csvHeaders.halogenCount]) || 0;
-    if (room[window.AUTOMATION_CONFIG.csvHeaders.cooktopType]) {
-      const val = window.AUTOMATION_CONFIG.cooktopOptions[room[window.AUTOMATION_CONFIG.csvHeaders.cooktopType].toLowerCase()];
-      if (val) selectDropdownByValue(document.querySelector(selectors.cooktopName), val);
-    }
-    if (room[window.AUTOMATION_CONFIG.csvHeaders.ovenType]) {
-      const val = window.AUTOMATION_CONFIG.ovenOptions[room[window.AUTOMATION_CONFIG.csvHeaders.ovenType].toLowerCase()];
-      if (val) selectDropdownByValue(document.querySelector(selectors.ovenName), val);
-    }
+    halogenCount += parseInt(room[config.csvHeaders.halogenCount]) || 0;
   });
+
+  const cooktopValue = getConfiguredValue(plan, 'cooktopType');
+  if (cooktopValue) {
+    const mappedCooktop = mapOptionValue(cooktopValue, config.cooktopOptions);
+    if (mappedCooktop) setSelectValueByText(selectors.cooktopName, mappedCooktop);
+  }
+
+  const ovenValue = getConfiguredValue(plan, 'ovenType');
+  if (ovenValue) {
+    const mappedOven = mapOptionValue(ovenValue, config.ovenOptions);
+    if (mappedOven) setSelectValueByText(selectors.ovenName, mappedOven);
+  }
+
   setInputValue(selectors.halogenCount, halogenCount.toString());
 
   // --- E. MULTI-TYPE FLOOR MATRIX ---
   let baselineFloor = 'Unclassified';
-  if (floor[window.AUTOMATION_CONFIG.csvHeaders.floorConstruction]) {
-    baselineFloor = window.AUTOMATION_CONFIG.floorConstructionOptions[floor[window.AUTOMATION_CONFIG.csvHeaders.floorConstruction].toLowerCase()] || 'Unclassified';
+  const rawFloorConstruction = getConfiguredValue(floor, 'floorConstruction');
+  if (rawFloorConstruction) {
+    const mappedFloorConstruction = mapOptionValue(rawFloorConstruction, config.floorConstructionOptions);
+    if (mappedFloorConstruction) baselineFloor = mappedFloorConstruction;
   }
+
   let floorAreas = {}, totalFloorSum = 0;
   rooms.forEach(room => {
-    const area = parseFloat(room[window.AUTOMATION_CONFIG.csvHeaders.roomArea]) || 0; if (area <= 0) return;
+    const area = parseFloat(room[config.csvHeaders.roomArea]) || 0; if (area <= 0) return;
     totalFloorSum += area;
     let type = baselineFloor;
-    const below = (room[window.AUTOMATION_CONFIG.csvHeaders.belowFloor] || '').trim().toLowerCase();
-    if (window.AUTOMATION_CONFIG.belowFloorOverrides[below]) type = window.AUTOMATION_CONFIG.belowFloorOverrides[below];
+    const below = (room[config.csvHeaders.belowFloor] || '').trim().toLowerCase();
+    if (config.belowFloorOverrides[below]) type = config.belowFloorOverrides[below];
     floorAreas[type] = (floorAreas[type] || 0) + area;
   });
   let sortedFloors = Object.keys(floorAreas).map(k => ({ type: k, area: floorAreas[k] })).sort((a,b) => b.area - a.area);
@@ -425,43 +571,103 @@ function fillOriginalAutomationFields(data) {
     }
   });
 
-  const rawFloorInsulation = floor[window.AUTOMATION_CONFIG.csvHeaders.floorInsulation];
+  const rawFloorInsulation = getConfiguredValue(floor, 'floorInsulation');
   const cleanFloorInsulation = normalizeInsulationValue(rawFloorInsulation);
   setInputValue(selectors.floorInsulationR, cleanFloorInsulation);
 
   // --- F. STRUCTURAL LOOKUPS ---
-  if (floor[window.AUTOMATION_CONFIG.csvHeaders.wallConstruction]) {
-    const val = window.AUTOMATION_CONFIG.wallConstructionOptions[floor[window.AUTOMATION_CONFIG.csvHeaders.wallConstruction].toLowerCase()];
+  const rawWallConstruction = getConfiguredValue(floor, 'wallConstruction', { preferLast: true });
+  if (rawWallConstruction) {
+    const val = mapOptionValue(rawWallConstruction, config.wallConstructionOptions);
     if (val) { selectDropdownByValue(document.querySelector(selectors.wallType1), val); setInputValue(selectors.wallPercent1, '100'); }
   }
-  const rawWallInsulation = floor[window.AUTOMATION_CONFIG.csvHeaders.wallInsulation];
+  const rawWallInsulation = getConfiguredValue(floor, 'wallInsulation');
   const cleanWallInsulation = normalizeInsulationValue(rawWallInsulation);
   setInputValue(selectors.wallInsulationR, cleanWallInsulation);
   
-  if (floor[window.AUTOMATION_CONFIG.csvHeaders.ceilingConstruction]) {
-    const val = window.AUTOMATION_CONFIG.roofConstructionOptions[floor[window.AUTOMATION_CONFIG.csvHeaders.ceilingConstruction].toLowerCase()];
+  const rawCeilingConstruction = getConfiguredValue(floor, 'ceilingConstruction');
+  if (rawCeilingConstruction) {
+    const val = mapOptionValue(rawCeilingConstruction, config.roofConstructionOptions);
     if (val) selectDropdownByValue(document.querySelector(selectors.roofType), val);
   }
 
-  const directCeilingIns = floor[window.AUTOMATION_CONFIG.csvHeaders.ceilingInsulation];
+  const directCeilingIns = getConfiguredValue(floor, 'ceilingInsulation');
   let finalCeilingR = null;
+  const directCeilingText = String(directCeilingIns || '').trim();
+  const directCeilingValue = normalizeInsulationValue(directCeilingText);
+  const directCeilingNumber = parseFloat(directCeilingValue);
 
-  if (directCeilingIns && !directCeilingIns.toLowerCase().includes('visual')) {
-    const cleanR = normalizeInsulationValue(directCeilingIns);
+  if (directCeilingText && /r/i.test(directCeilingText)) {
+    const cleanR = normalizeInsulationValue(directCeilingText);
     if (cleanR) finalCeilingR = parseFloat(cleanR).toFixed(1);
+  } else if (directCeilingValue && !isNaN(directCeilingNumber) && directCeilingNumber <= 12) {
+    finalCeilingR = parseFloat(directCeilingValue).toFixed(1);
   }
+
   if (!finalCeilingR) {
-    const mat = floor[window.AUTOMATION_CONFIG.csvHeaders.insulationMaterial];
-    const depth = parseInt(floor[window.AUTOMATION_CONFIG.csvHeaders.insulationDepth]);
+    const mat = getConfiguredValue(floor, 'insulationMaterial');
+    const depth = parseInt(getConfiguredValue(floor, 'insulationDepth'));
     if (mat && !isNaN(depth)) finalCeilingR = lookupConfigInsulationRValue(mat, depth);
   }
   if (finalCeilingR) setInputValue(selectors.ceilingInsulationR, finalCeilingR);
 
+  const rawWaterHeaterType = getConfiguredValue(plan, 'waterHeaterTypePlan');
+  if (rawWaterHeaterType) {
+    const mappedWaterHeater = mapOptionValue(rawWaterHeaterType, config.waterHeaterOptions);
+    if (mappedWaterHeater) setSelectValueByText(selectors.waterHeaterType, mappedWaterHeater);
+  }
+  const rawWaterHeaterPerf = getConfiguredValue(plan, 'waterHeaterPerfPlan');
+  if (rawWaterHeaterPerf) {
+    const normalizedWaterHeaterPerf = String(normalizeInsulationValue(rawWaterHeaterPerf) || '').replace(/\.$/, '');
+    if (normalizedWaterHeaterPerf) setInputValue(selectors.waterHeaterPerf, normalizedWaterHeaterPerf);
+  }
+
+  const rawSolarSize = getConfiguredValue(plan, 'solarSizePlan');
+  if (rawSolarSize) setInputValue(selectors.solarSize, normalizeInsulationValue(rawSolarSize));
+
+  const rawPoolArea = getConfiguredValue(plan, 'poolAreaPlan');
+  if (rawPoolArea) setInputValue(selectors.poolArea, normalizeInsulationValue(rawPoolArea));
+
+  const rawPoolVolume = getConfiguredValue(plan, 'poolVolumePlan');
+  if (rawPoolVolume) setInputValue(selectors.poolVolume, normalizeInsulationValue(rawPoolVolume));
+
+  const poolDepthValue = normalizeInsulationValue(getConfiguredValue(plan, 'poolDepthPlan')) || '1';
+  if (poolDepthValue) setInputValue(selectors.poolDepth, poolDepthValue);
+
+  const rawPoolPump = getConfiguredValue(plan, 'poolPumpPlan');
+  if (rawPoolPump) {
+    const mappedPoolPump = mapOptionValue(rawPoolPump, config.poolPumpOptions);
+    if (mappedPoolPump) setSelectValueByText(selectors.poolPump, mappedPoolPump);
+  }
+
+  const rawRoofColour = getConfiguredValue(floor, 'roofColourPlan');
+  const roofColourKey = normalizeOptionKey(rawRoofColour);
+  const mappedRoofColour = mapOptionValue(rawRoofColour, config.roofColourOptions);
+  const roofColourSelect = document.querySelector(selectors.roofColour);
+
+  if (mappedRoofColour) {
+    selectDropdownByValue(roofColourSelect, mappedRoofColour);
+  } else {
+    selectDropdownByValue(roofColourSelect, '0.00');
+  }
+
+  setInputValue(selectors.roofAbsorptance, '');
+  if (roofColourKey && config.roofColourAbsorptanceValues?.[roofColourKey]) {
+    setInputValue(selectors.roofAbsorptance, config.roofColourAbsorptanceValues[roofColourKey]);
+  }
+
+  const rawSarking = getConfiguredValue(floor, 'roofSarkingPlan');
+  if (/(^|\s)(yes|y|true|1)(\s|$)/i.test(String(rawSarking || ''))) {
+    setInputValue(selectors.roofInsulationR, '0.5');
+  } else if (/(^|\s)(no|n|false|0)(\s|$)/i.test(String(rawSarking || ''))) {
+    setInputValue(selectors.roofInsulationR, '');
+  }
+
   if (objects['Air conditioner'] && parseInt(objects['Air conditioner']) > 0) {
-    selectDropdownByValue(document.querySelector(selectors.spaceHeaterName1), window.AUTOMATION_CONFIG.hvacDefaults.spaceHeaterName);
-    selectDropdownByValue(document.querySelector(selectors.spaceCoolerName1), window.AUTOMATION_CONFIG.hvacDefaults.spaceCoolerName);
-    setInputValue(selectors.spaceHeaterArea1, window.AUTOMATION_CONFIG.hvacDefaults.heaterCoveragePercent);
-    setInputValue(selectors.spaceCoolerArea1, window.AUTOMATION_CONFIG.hvacDefaults.coolerCoveragePercent);
+    selectDropdownByValue(document.querySelector(selectors.spaceHeaterName1), config.hvacDefaults.spaceHeaterName);
+    selectDropdownByValue(document.querySelector(selectors.spaceCoolerName1), config.hvacDefaults.spaceCoolerName);
+    setInputValue(selectors.spaceHeaterArea1, config.hvacDefaults.heaterCoveragePercent);
+    setInputValue(selectors.spaceCoolerArea1, config.hvacDefaults.coolerCoveragePercent);
   }
 }
 
@@ -715,14 +921,53 @@ function processStructuresAndAreas(csvRooms, svgRooms, userRotationOffset){
 /* -------------------------
    UI VALUE EMITTER UTILITIES
 ------------------------- */
-function setInputValue(selector, value) {
+function normalizeOptionKey(value) {
+  return (value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+function setInputValue(selector, value, retries = 4) {
   const el = document.querySelector(selector);
   if (el) {
-    el.value = value;
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
+    const isSelect = el.tagName === 'SELECT';
+    const isTextLike = ['INPUT', 'TEXTAREA'].includes(el.tagName);
+
+    if (isSelect) {
+      const normalized = String(value || '').trim();
+      let matchedOption = null;
+      Array.from(el.options).forEach((option) => {
+        if (String(option.value).trim() === normalized || normalizeOptionKey(option.value) === normalizeOptionKey(normalized) || normalizeOptionKey(option.textContent) === normalizeOptionKey(normalized)) {
+          matchedOption = option;
+        }
+      });
+      if (matchedOption) {
+        matchedOption.selected = true;
+        el.value = matchedOption.value;
+      } else {
+        el.value = normalized;
+      }
+    } else if (isTextLike) {
+      el.value = value;
+    } else {
+      el.textContent = value;
+      if (el.setAttribute) el.setAttribute('data-filled-value', String(value));
+    }
+
+    if (isTextLike || isSelect) {
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
     el.style.transition = 'background-color 0.3s'; el.style.backgroundColor = '#e3f2fd';
-    setTimeout(() => { el.style.backgroundColor = ''; }, 600);
+    setTimeout(() => {
+      if (el && document.body) {
+        el.style.backgroundColor = '#e8f5e9';
+      }
+    }, 600);
+    return;
+  }
+
+  if (retries > 0) {
+    setTimeout(() => setInputValue(selector, value, retries - 1), 200);
   }
 }
 
@@ -732,9 +977,29 @@ function normalizeInsulationValue(raw) {
   if (!cleaned || cleaned === '.' || isNaN(parseFloat(cleaned))) return '';
   return cleaned;
 }
-function selectDropdownByValue(el, val) {
-  if (!el) return;
-  el.value = val;
+function selectDropdownByValue(el, val, retries = 4) {
+  if (!el) {
+    if (retries > 0) {
+      setTimeout(() => selectDropdownByValue(el, val, retries - 1), 200);
+    }
+    return;
+  }
+
+  const normalizedValue = String(val || '').trim();
+  let matchedOption = null;
+  Array.from(el.options || []).forEach((option) => {
+    if (String(option.value).trim() === normalizedValue || normalizeOptionKey(option.value) === normalizeOptionKey(normalizedValue) || normalizeOptionKey(option.textContent) === normalizeOptionKey(normalizedValue)) {
+      matchedOption = option;
+    }
+  });
+
+  if (matchedOption) {
+    matchedOption.selected = true;
+    el.value = matchedOption.value;
+  } else {
+    el.value = normalizedValue;
+  }
+
   el.dispatchEvent(new Event('change', { bubbles: true }));
   el.dispatchEvent(new Event('input', { bubbles: true }));
 }
