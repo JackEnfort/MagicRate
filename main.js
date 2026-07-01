@@ -219,50 +219,51 @@ async function runAutomation() {
       }
     }
 
-    const csvRoomsData = parseCSVData(csvText);
-    const floorAttr = originalParsedData.floorAttributes;
-    const rawGlazing = (floorAttr[window.AUTOMATION_CONFIG.csvHeaders.glazingType] || '').toLowerCase();
-    const isDoubleGlazed = window.AUTOMATION_CONFIG.doubleGlazingKeywords.some(kw => rawGlazing.includes(kw.toLowerCase()));
+const csvRoomsData = parseCSVData(csvText);
 
+    // 1. Initialize the map with an explicit tracker for double glazed area
     const grandFacadeMap = {};
     const compassPoints16 = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
     compassPoints16.forEach(cp => {
-      grandFacadeMap[cp] = { grossArea: 0, windowArea: 0 };
+      grandFacadeMap[cp] = { grossArea: 0, windowArea: 0, doubleGlazedArea: 0 };
     });
 
+    // 2. Loop through stories and accumulate data
     for (let i = 0; i < numStories; i++) {
       const svgText = await readText(svgFiles[i]);
       const svgData = parseSVGPlan(svgText);
       const csvRoomsForFloor = csvRoomsData.filter(room => room.floor === i);
+      
+      // NOTE: processStructuresAndAreas must be updated to return f.doubleGlazedArea (see step 2 below)
       const results = processStructuresAndAreas(csvRoomsForFloor, svgData, userRotationOffset);
+      
       results.facades.forEach(f => {
         if (grandFacadeMap[f.compassPoint] !== undefined) {
           grandFacadeMap[f.compassPoint].grossArea += f.grossArea;
           grandFacadeMap[f.compassPoint].windowArea += f.windowArea;
+          grandFacadeMap[f.compassPoint].doubleGlazedArea += (f.doubleGlazedArea || 0);
         }
       });
     }
 
+    // 3. Clear all input elements before writing fresh values
     compassPoints16.forEach(cp => {
       setInputValue(`#ExternalWallArea${cp}M2`, "");
       setInputValue(`#WindowArea${cp}M2`, "");
       setInputValue(`#WindowDoubleGlazedArea${cp}M2`, "");
     });
 
+    // 4. Calculate net values and write to UI
     compassPoints16.forEach(cp => {
       const metrics = grandFacadeMap[cp];
       if (metrics.grossArea > 0 || metrics.windowArea > 0) {
         const netSolidWallArea = Math.max(0, metrics.grossArea - metrics.windowArea);
         const totalWindowArea = metrics.windowArea.toFixed(2);
+        const doubleGlazedArea = metrics.doubleGlazedArea.toFixed(2);
 
         setInputValue(`#ExternalWallArea${cp}M2`, netSolidWallArea.toFixed(2));
         setInputValue(`#WindowArea${cp}M2`, totalWindowArea);
-
-        if (isDoubleGlazed) {
-          setInputValue(`#WindowDoubleGlazedArea${cp}M2`, totalWindowArea);
-        } else {
-          setInputValue(`#WindowDoubleGlazedArea${cp}M2`, "0.00");
-        }
+        setInputValue(`#WindowDoubleGlazedArea${cp}M2`, doubleGlazedArea); 
       }
     });
 
@@ -278,7 +279,6 @@ async function runAutomation() {
   }
 }
 
-// 3. Global Message Passing Listener: Hooks click event triggers from background.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "toggle_magicplan_overlay") {
     toggleMagicPlanOverlay();
@@ -845,11 +845,27 @@ function parseSVGPlan(svgText){
   return roomsList;
 }
 
-function processStructuresAndAreas(csvRooms, svgRooms, userRotationOffset){
+function processStructuresAndAreas(csvRooms, svgRooms, userRotationOffset) {
   const tolerance = 0.05;
   const claimedSvgRooms = new Set();
   let totalWeightedHeightPool = 0, totalFloorAreaPool = 0;
   const matchedRoomPairs = [];
+
+  // Helper function to dynamically check if an opening row contains double-glazing keywords
+  function isRowDoubleGlazed(winObj) {
+    const keywords = window.AUTOMATION_CONFIG.doubleGlazingKeywords || ['double'];
+    
+    // Scan all properties attached to this window object
+    for (const key in winObj) {
+      if (key.toLowerCase().includes('glaz') || key.toLowerCase().includes('description')) {
+        const value = String(winObj[key] || '').toLowerCase();
+        if (keywords.some(kw => value.includes(kw.toLowerCase()))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 
   csvRooms.forEach(csvRoom => {
     const candidates = svgRooms.filter(r => r.name === csvRoom.name && !claimedSvgRooms.has(r));
@@ -888,8 +904,9 @@ function processStructuresAndAreas(csvRooms, svgRooms, userRotationOffset){
       const compass = getCompassPoint(trueAzimuth);
       let displayLength = bestDim ? bestDim.value : wallObj.width;
 
+      // Initialize map with doubleGlazedArea tracking
       if (!dynamicFacadeMap[compass]) {
-        dynamicFacadeMap[compass] = { angle: trueAzimuth, length: 0, grossArea: 0, windowArea: 0 };
+        dynamicFacadeMap[compass] = { angle: trueAzimuth, length: 0, grossArea: 0, windowArea: 0, doubleGlazedArea: 0 };
       }
 
       dynamicFacadeMap[compass].length += displayLength;
@@ -898,20 +915,28 @@ function processStructuresAndAreas(csvRooms, svgRooms, userRotationOffset){
       roomWallsProcessed.push({ wallId: wallObj.wall, compassPoint: compass });
     });
 
+    // Process openings and separate single vs double glazing area
     csvRoom.openings.forEach(winObj => {
       const matchingWall = roomWallsProcessed.find(w => w.wallId === winObj.wall);
       if (matchingWall) {
-        dynamicFacadeMap[matchingWall.compassPoint].windowArea += (winObj.width * winObj.height);
+        const openingArea = winObj.width * winObj.height;
+        dynamicFacadeMap[matchingWall.compassPoint].windowArea += openingArea;
+        
+        // If this specific window row is double glazed, add it to the tracking total
+        if (isRowDoubleGlazed(winObj)) {
+          dynamicFacadeMap[matchingWall.compassPoint].doubleGlazedArea += openingArea;
+        }
       }
     });
   });
 
   const finalCalculatedFacades = [];
-  for(const compassKey in dynamicFacadeMap){
+  for (const compassKey in dynamicFacadeMap) {
     finalCalculatedFacades.push({
       compassPoint: compassKey,
       grossArea: dynamicFacadeMap[compassKey].grossArea,
-      windowArea: dynamicFacadeMap[compassKey].windowArea
+      windowArea: dynamicFacadeMap[compassKey].windowArea,
+      doubleGlazedArea: dynamicFacadeMap[compassKey].doubleGlazedArea // <-- Passes data back up to your main loop
     });
   }
 
