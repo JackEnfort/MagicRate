@@ -3,7 +3,7 @@
     "projectType": "Existing"
   },
   "unconditionedRoomKeywords": ["laundry", "toilet", "bathroom", "garage"],
-  "doubleGlazingKeywords": ["double", "double.air.filled", "triple"],
+  "doubleGlazingKeywords": ["double", "double.air.filled", "triple", "Double.glazed.air.filled", "Double.glazed.argon.filled"],
   "csvHeaders": {
     "ceilingInsulation": "Ceiling insulation thickness (mm)",
     "ceilingInsulationType": "Ceiling insulation type",
