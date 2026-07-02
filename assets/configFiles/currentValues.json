@@ -2,7 +2,7 @@
   "defaults": {
     "projectType": "Existing"
   },
-  "unconditionedRoomKeywords": ["laundry", "toilet", "bathroom", "garage"],
+  "unconditionedRoomKeywords": ["laundry", "toilet", "bathroom", "garage", "bath 2", "storeroom", "store", "carport"],
   "doubleGlazingKeywords": ["double", "double.air.filled", "triple", "Double.glazed.air.filled", "Double.glazed.argon.filled"],
   "csvHeaders": {
     "ceilingInsulation": "Ceiling insulation thickness (mm)",
@@ -95,7 +95,7 @@
     "exposed": "Exposed", "open": "Open", "protected": "Protected", "suburban": "Suburban"
   },
   "roofColourAbsorptanceValues": {
-    "dark": "1",
+    "dark": "0.9",
     "medium": "0.5",
     "light": "0.1"
   },
