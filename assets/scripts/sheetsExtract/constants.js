@@ -1,6 +1,6 @@
 const CONFIG = {
-    sheetId: '1IoNTmfjmHQBzWPpw5ucRsgF6eMkuCI_rsWvvxajgXAw', 
-    sheetTabName: 'Form responses 2'
+    sheetId: '1UM82f_iHgekjfH3qCSW7AWvIJ2VDxjVQTT5DOCXGanw', 
+    sheetTabName: 'HeatingCoolingDump'
 };
 
 // Clean exact/substring token matches pointing directly to your rewritten column names
