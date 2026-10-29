@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aspect — Facade & Window Estimator</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#14251f;background:#f4f6f2;font-synthesis:none;text-rendering:optimizeLegibility;--green:#16745a;--mint:#e4f1eb;--ink:#14251f;--muted:#75817b;--line:#e4e9e4;--card:#fff;--amber:#b77828;--shadow:0 12px 32px #1a33200c}
+    *{box-sizing:border-box}body{margin:0;min-width:320px}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:1512px;margin:0 auto;padding:28px 34px 42px}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}.brand{display:flex;align-items:center;gap:12px}.brandmark{width:42px;height:42px;border-radius:13px;background:#dceee5;color:var(--green);display:grid;place-items:center}.brandmark svg{width:25px;height:25px}.brand h1{font-size:19px;letter-spacing:-.04em;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:12px}.local-tag{background:#e8f2ed;border:1px solid #d5e8dc;color:#356a53;border-radius:99px;padding:8px 12px;font-size:12px;font-weight:650;display:flex;align-items:center;gap:7px}.local-tag:before{content:"";width:7px;height:7px;border-radius:50%;background:#48a274}.intro{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:var(--green);font-weight:750}.intro h2{font-size:28px;letter-spacing:-.055em;margin:7px 0 5px}.intro p{font-size:13px;color:var(--muted);margin:0;max-width:640px;line-height:1.55}.step{font-size:12px;color:#66736c;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;white-space:nowrap}.step b{color:var(--green)}.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}.upload-card{background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);padding:16px 18px;display:flex;align-items:center;gap:14px;min-height:91px}.file-icon{width:42px;height:42px;background:#f0f5f1;color:var(--green);display:grid;place-items:center;border-radius:12px;flex:none}.file-icon svg{width:22px;height:22px}.upload-copy{min-width:0;flex:1}.upload-copy strong{font-size:13px;display:block}.upload-copy small{color:var(--muted);font-size:11px;display:block;margin-top:4px}.file-name{color:#345f4b!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.upload-button{border:1px solid #dbe5dd;border-radius:9px;padding:8px 11px;background:white;color:#365b48;font-size:11px;font-weight:700;white-space:nowrap}.upload-button:hover{background:#f1f7f3}.upload-card input{display:none}.workspace{display:grid;grid-template-columns:minmax(0,1.66fr) minmax(325px,.9fr);gap:18px;align-items:start}.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}.panel-head{padding:17px 19px 14px;border-bottom:1px solid #edf0ed;display:flex;align-items:center;justify-content:space-between}.panel-title{font-size:14px;font-weight:750;letter-spacing:-.015em}.panel-sub{font-size:11px;color:var(--muted);margin-top:4px}.plan-status{font-size:10px;color:#75817b;background:#f2f4f2;border-radius:99px;padding:6px 9px}.canvas-wrap{position:relative;background:#fafbf9;min-height:500px;overflow:hidden}.canvas-wrap svg{display:block;width:100%;height:min(62vh,650px);min-height:480px;touch-action:none;user-select:none}.empty-state{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:35px;pointer-events:none}.empty-state div{max-width:340px}.empty-state .empty-symbol{margin:0 auto 12px;width:48px;height:48px;border-radius:16px;background:#e8f2ed;color:var(--green);display:grid;place-items:center;font-size:24px}.empty-state h3{margin:0;font-size:15px}.empty-state p{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.55}.canvas-tools{position:absolute;left:15px;top:15px;display:flex;gap:7px}.tool-pill{background:#fff;border:1px solid #e6eae6;border-radius:9px;padding:7px 9px;color:#65726b;font-size:10px;box-shadow:0 2px 6px #00000008}.legend{display:flex;gap:16px;padding:12px 19px;border-top:1px solid #edf0ed;flex-wrap:wrap}.legend-item{font-size:10px;color:#68756e;display:flex;align-items:center;gap:6px}.legend-dot{width:9px;height:9px;border-radius:50%;background:#d9e3dc}.legend-dot.window{background:#e2964d}.legend-dot.facade{width:16px;height:3px;border-radius:3px;background:#178365}.right-col{display:flex;flex-direction:column;gap:14px}.facade-panel{padding-bottom:14px}.facade-intro{padding:16px 17px 12px}.facade-intro h3{font-size:14px;margin:0}.facade-intro p{font-size:11px;color:var(--muted);line-height:1.5;margin:5px 0 0}.add-row{padding:0 16px 12px}.add-button{width:100%;border:0;border-radius:11px;background:#16745a;color:white;padding:11px 12px;display:flex;align-items:center;justify-content:center;gap:9px;font-weight:750;font-size:12px;box-shadow:0 5px 12px #16745a26}.add-button:hover{background:#12644c}.plus{font-size:22px;font-weight:400;line-height:14px}.add-button:disabled{background:#b8c9c0;cursor:not-allowed;box-shadow:none}.facade-list{padding:0 15px;display:flex;flex-direction:column;gap:8px}.facet{border:1px solid #e9ede9;border-radius:11px;padding:10px 11px;display:grid;grid-template-columns:26px minmax(60px,1fr) 92px;gap:9px;align-items:center}.facet-label{width:25px;height:25px;border-radius:8px;background:#eef5f1;color:var(--green);display:grid;place-items:center;font-size:11px;font-weight:800}.facet-meta{min-width:0}.facet-meta strong{font-size:11px;display:block}.facet-meta small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.facet select{width:100%;border:1px solid #e1e7e2;background:#fff;border-radius:7px;padding:6px 6px;font-size:10px;color:#31483c}.facet select:disabled{background:#f3f5f3;color:#b1bab4}.degrees{font-size:10px;color:#75817b;text-align:right;margin-top:4px}.remove-line{border:0;background:transparent;color:#a6b0a9;font-size:16px;padding:0 3px}.remove-line:hover{color:#b24f41}.validation{margin:10px 15px 0;border-radius:9px;background:#fff7eb;border:1px solid #f1e1c8;color:#8b602c;padding:9px 10px;font-size:10px;line-height:1.45;display:none}.validation.show{display:block}.rotate-box{margin:15px 16px 0;border-top:1px solid #edf0ed;padding-top:13px}.rotate-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700}.rotate-value{font-size:10px;color:var(--green);font-variant-numeric:tabular-nums}.rotate-box input[type=range]{width:100%;accent-color:var(--green);margin:12px 0 4px}.range-labels{display:flex;justify-content:space-between;color:#94a098;font-size:9px}.review-panel .panel-head{padding-bottom:13px}.review-count{font-size:10px;color:#658070;background:#edf5ef;border-radius:99px;padding:5px 8px}.opening-list{max-height:236px;overflow:auto;padding:3px 15px 13px}.opening-row{display:flex;align-items:center;gap:9px;padding:9px 1px;border-bottom:1px solid #f0f2f0}.opening-row:last-child{border-bottom:0}.opening-icon{width:24px;height:24px;border-radius:7px;background:#fff2e4;color:#ba7836;display:grid;place-items:center;font-size:11px}.opening-details{min-width:0;flex:1}.opening-details strong{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.opening-details small{color:var(--muted);display:block;font-size:9px;margin-top:3px}.opening-row select{max-width:105px;border:1px solid #e3e8e3;border-radius:7px;background:#fff;padding:6px;font-size:9px;color:#55635b}.empty-openings{font-size:11px;color:#89948d;text-align:center;padding:24px 12px}.summary{margin-top:18px}.summary .panel-head{padding:17px 20px}.summary-content{padding:18px 20px 20px}.totals{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:19px}.metric{border:1px solid #e9ede9;border-radius:12px;padding:13px 15px}.metric .label{font-size:10px;color:#78837c}.metric .value{font-size:21px;letter-spacing:-.04em;font-weight:750;margin-top:7px;font-variant-numeric:tabular-nums}.metric .unit{font-size:11px;color:#728078;font-weight:500;letter-spacing:0}.metric small{font-size:9px;color:#93a098;display:block;margin-top:4px}.direction-table{width:100%;border-collapse:collapse}.direction-table th{text-align:left;color:#89948d;font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:700;padding:0 10px 9px}.direction-table td{border-top:1px solid #edf0ed;padding:10px;font-size:11px;color:#415148;font-variant-numeric:tabular-nums}.direction-table td:first-child{font-weight:750;color:#263c30}.direction-table td:not(:first-child),.direction-table th:not(:first-child){text-align:right}.dir-chip{display:inline-flex;align-items:center;justify-content:center;background:#edf5f0;color:#347153;border-radius:6px;min-width:34px;padding:4px;font-size:10px}.notice{font-size:10px;color:#8c6841;line-height:1.5;margin-top:12px;background:#fff9f0;border:1px solid #f0e5d5;border-radius:9px;padding:10px 12px}.footer{display:flex;justify-content:space-between;gap:16px;color:#8c9790;font-size:10px;padding:14px 2px}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;background:#17382b;color:#fff;padding:11px 16px;border-radius:10px;font-size:12px;box-shadow:0 10px 28px #112c2040;transition:.18s;pointer-events:none;z-index:5}.toast.show{opacity:1;transform:translate(-50%,0)}.canvas-mode{cursor:crosshair!important}.canvas-caption{position:absolute;right:14px;bottom:14px;background:#ffffffdf;border:1px solid #edf0ed;color:#75817b;border-radius:8px;padding:7px 9px;font-size:9px;pointer-events:none}
+    .facet{grid-template-columns:26px minmax(60px,1fr) 92px 14px}
+    @media(max-width:1000px){.workspace{grid-template-columns:1fr}.right-col{display:grid;grid-template-columns:1fr 1fr;align-items:start}.intro{align-items:flex-start;gap:16px;flex-direction:column}.canvas-wrap svg{height:55vh}}
+    @media(max-width:650px){.app{padding:18px 14px 30px}.topbar{margin-bottom:20px}.local-tag{font-size:0;padding:9px}.local-tag:before{margin:0}.upload-grid{grid-template-columns:1fr}.upload-card{padding:13px}.right-col{display:flex}.canvas-wrap{min-height:390px}.canvas-wrap svg{min-height:390px;height:55vh}.totals{grid-template-columns:1fr}.metric{padding:11px 13px}.summary-content{padding:14px 12px}.direction-table td,.direction-table th{padding:9px 5px}.footer{flex-direction:column}}
+  </style>
+  <style>
+    .canvas-tools{display:flex;align-items:center;gap:6px}
+    .zoom-readout{min-width:42px;text-align:center;color:#66736c;font-size:10px;font-variant-numeric:tabular-nums}
+    #planSvg{touch-action:none}
+    .canvas-wrap.has-plan .empty-state{display:none}
+    #planSvg{cursor:grab}
+    #planSvg.canvas-mode{cursor:crosshair}
+    #planSvg.is-panning{cursor:grabbing}
+    .grid-toggle{display:flex;align-items:center;gap:5px;padding:0 6px;color:#58665e;font-size:10px;white-space:nowrap;cursor:pointer}
+    .grid-toggle input{width:13px;height:13px;margin:0;accent-color:var(--green)}
+    .auto-facade-button{width:100%;margin-top:7px;padding:8px 10px;border:1px solid #cddbd1;border-radius:9px;background:#f6faf7;color:#356a53;font-size:11px;font-weight:650}
+    .auto-facade-button:hover:not(:disabled){background:#e8f2ed}
+    .auto-facade-button:disabled{opacity:.5;cursor:not-allowed}
+    .auto-facade-note{display:block;margin-top:5px;color:#89948d;font-size:9px;line-height:1.4;text-align:center}
+    .floor-upload-controls{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+    .floor-upload-controls label,.floor-view-label{display:flex;align-items:center;gap:4px;color:#68756e;font-size:10px}
+    .floor-upload-controls select,.floor-view-label select{padding:4px 6px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);font-size:10px}
+    .opening-row{grid-template-columns:26px minmax(0,1fr) auto}
+    .opening-details small{line-height:1.45}
+    .opening-status{display:block;color:#9a6a2b!important}
+    .legend-dot{background:#4c5751}
+    .legend-dot.window{background:#2581c4}
+    .legend-dot.door{background:#171b19}
+    .opening-mark{cursor:pointer}
+    .opening-mark.selected circle{stroke:#14251f;stroke-width:3px}
+    .selected-opening{margin:0 16px 10px;padding:12px;background:#f7f9f6;border:1px solid var(--line);border-radius:10px;font-size:11px}
+    .selected-opening:empty{display:none}
+    .selected-opening-head{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--ink)}
+    .selected-opening-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .selected-opening-dot.window{background:#d88740}.selected-opening-dot.door{background:#ae8b61}
+    .selected-opening-meta{margin:7px 0;color:var(--muted);line-height:1.55}
+    .selected-opening label{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#516058;font-weight:650}
+    .selected-opening select{max-width:175px}
+    .totals{grid-template-columns:repeat(4,minmax(0,1fr))}
+    @media(max-width:850px){.totals{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:520px){.totals{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><div class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 19V5l8 5 8-5v14l-8-5-8 5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 10v4" stroke="currentColor" stroke-width="1.7"/></svg></div><div><h1>Aspect</h1><p>Facade & window estimator</p></div></div>
+      <div class="local-tag">Files stay on this device</div>
+    </header>
+    <section class="intro"><div><div class="eyebrow">Magicplan analysis</div><h2>Understand every side of your home.</h2><p>Load your floor plan and statistics export, trace the four cardinal facades, and review an estimated wall and window area by compass direction.</p></div><div class="step"><b>01</b> Upload &nbsp;·&nbsp; <b>02</b> Trace facades &nbsp;·&nbsp; <b>03</b> Review</div></section>
+    <section class="upload-grid" aria-label="Required exports">
+      <label class="upload-card" for="dxfFile"><div class="file-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3.8h8l4 4V20H6V3.8Z" stroke="currentColor" stroke-width="1.6"/><path d="M14 4v4h4M8.5 12h7m-7 3h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="upload-copy"><strong>Floor plans <span style="color:#c25f4d">· 1–4 DXFs</span></strong><small class="file-name" id="dxfName">Choose a floor plan DXF</small><div class="floor-upload-controls"><label>Floors <select id="floorCount" aria-label="Number of floors"><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label><label>Upload to <select id="floorUploadTarget" aria-label="Choose floor for DXF upload"><option value="0">Ground Floor</option></select></label></div><small>One DXF per floor · use the single matching home CSV below</small></div><span class="upload-button">Browse DXF</span><input id="dxfFile" type="file" accept=".dxf,application/dxf" /></label>
+      <label class="upload-card" for="csvFile"><div class="file-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="upload-copy"><strong>Statistics export <span style="color:#c25f4d">· required</span></strong><small class="file-name" id="csvName">Choose a Magicplan CSV export</small><small>Room, wall, window and opening measurements</small></div><span class="upload-button">Browse CSV</span><input id="csvFile" type="file" accept=".csv,text/csv" /></label>
+    </section>
+    <main class="workspace">
+      <section class="panel plan-panel">
+        <div class="panel-head"><div><div class="panel-title">Floor plan</div><div class="panel-sub" id="planSub">Upload a DXF and CSV to begin</div></div><div style="display:flex;align-items:center;gap:8px"><label class="floor-view-label">View <select id="activeFloorSelect" aria-label="Floor plan to display"><option value="0">Ground Floor</option></select></label><div class="plan-status" id="planStatus">Waiting for files</div></div></div>
+        <div class="canvas-wrap" id="canvasWrap">
+          <svg id="planSvg" viewBox="0 0 1000 700" role="img" aria-label="Interactive floor plan"></svg>
+          <div class="empty-state" id="emptyState"><div><div class="empty-symbol">⌂</div><h3>Your plan will appear here</h3><p>Use a Magicplan 2D DXF export for the clearest wall geometry. The drawing is processed locally in your browser.</p></div></div>
+          <div class="canvas-tools"><button class="tool-pill" id="zoomOutButton" type="button" aria-label="Zoom out" title="Zoom out">−</button><span class="zoom-readout" id="zoomReadout">100%</span><button class="tool-pill" id="zoomInButton" type="button" aria-label="Zoom in" title="Zoom in">＋</button><button class="tool-pill" id="fitButton" type="button">Fit plan</button><button class="tool-pill" id="clearButton" type="button">Clear facades</button><label class="grid-toggle"><input id="gridSnap" type="checkbox" checked /> Grid snap</label></div><div class="canvas-caption" id="canvasCaption">Load both exports to enable tracing</div>
+        </div>
+        <div class="legend"><span class="legend-item"><i class="legend-dot"></i>Wall geometry</span><span class="legend-item"><i class="legend-dot window"></i>Window markers</span><span class="legend-item"><i class="legend-dot door"></i>Door / opening markers</span><span class="legend-item"><i class="legend-dot facade"></i>Traced facade</span></div>
+      </section>
+      <aside class="right-col">
+        <section class="panel facade-panel">
+          <div class="facade-intro"><h3>Trace your four facades</h3><p>Click the plus, then drag a line along one exterior face of the plan. Assign each unique cardinal direction once.</p></div>
+          <div class="add-row"><button class="add-button" id="addFacade" type="button" disabled><span class="plus">＋</span><span id="addLabel">Add a facade line</span></button><button class="auto-facade-button" id="autoFacadeButton" type="button" disabled>Auto-place facades (approx.)</button><small class="auto-facade-note">Uses the plan bounds, 1.5 m (3 grid blocks) outside each side; replaces existing lines.</small></div>
+          <div class="facade-list" id="facadeList"></div>
+          <div class="validation" id="validation"></div>
+          <div class="rotate-box"><div class="rotate-head"><span>Rotate home heading</span><span class="rotate-value" id="rotationValue">0° correction</span></div><input id="rotation" aria-label="Rotate home heading" type="range" min="-180" max="180" step="0.5" value="0"/><div class="range-labels"><span>−180°</span><span>0°</span><span>+180°</span></div></div>
+        </section>
+        <section class="panel review-panel"><div class="panel-head"><div><div class="panel-title">Detected openings</div><div class="panel-sub">All DXF markers; only traced-facade openings affect totals</div></div><div class="review-count" id="openingCount">0 / 0 on facades</div></div><div class="selected-opening" id="selectedOpening"><div class="empty-openings">Click an orange or brown marker on the plan to inspect and assign it.</div></div><div class="opening-list" id="openingList"><div class="empty-openings">Upload the plan and CSV to identify openings.</div></div></section>
+      </aside>
+    </main>
+    <section class="panel summary">
+      <div class="panel-head"><div><div class="panel-title">Facade summary</div><div class="panel-sub" id="summarySub">Estimates appear after four directions are assigned</div></div><div class="plan-status" id="summaryStatus">Needs 4 facades</div></div>
+      <div class="summary-content"><div class="totals"><div class="metric"><div class="label">Exterior wall · gross</div><div class="value" id="grossTotal">— <span class="unit">m²</span></div><small>Facade length × ceiling height</small></div><div class="metric"><div class="label">Exterior wall · net</div><div class="value" id="netTotal">— <span class="unit">m²</span></div><small>Gross less all classified openings</small></div><div class="metric"><div class="label">Exterior windows · gross</div><div class="value" id="windowTotal">— <span class="unit">m²</span></div><small>All classified window area</small></div><div class="metric"><div class="label">Double-glazed windows</div><div class="value" id="doubleWindowTotal">— <span class="unit">m²</span></div><small>Subset of gross window area</small></div></div>
+        <table class="direction-table"><thead><tr><th>Heading</th><th>Facade length</th><th>Gross wall</th><th>Net wall</th><th>Windows · gross</th><th>Double glazed</th></tr></thead><tbody id="directionRows"><tr><td colspan="6" style="text-align:center;color:#97a199;padding:18px">Add and assign all four facade directions to see the breakdown.</td></tr></tbody></table>
+        <div class="notice">Rough estimate: gross wall area is traced facade length × the CSV ceiling height. Gross window area includes single- and double-glazed windows; double-glazed area is a subset. Glazing defaults to FLOOR ATTRIBUTES and a window-level WALL ATTRIBUTES value overrides that default. Each DXF opening is matched once to a CSV opening in the same room and category (window or door); DXF marker suffixes are not treated as CSV wall numbers. Confirm the facade lines and opening areas before relying on totals. Interior-wall / party-wall exclusions depend on your traced exterior faces.</div>
+      </div>
+    </section>
+    <footer class="footer"><span>Aspect runs locally; selected files are not uploaded.</span><span>Compass headings use 16-point sectors (22.5° each).</span></footer>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+<script>
+(() => {
+  const directions = ["N","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW","NNE"];
+  const cardinal = ["N","E","S","W"];
+  const colors = {N:"#168365",E:"#4388c5",S:"#d47d47",W:"#8b6ab8"};
+  const floorLabels=["Ground Floor","1st Floor","2nd Floor","3rd Floor"];
+  const makeFloor=(label)=>({label,dxf:null,facades:[],rotation:0,zoom:1,selectedOpening:null,openingFacadeAssignments:{},doorClassifications:{}});
+  const state = {dxf:null,csv:null,facades:[],nextFacadeId:1,rotation:0,zoom:1,rooms:[],walls:[],csvRecords:[],defaultGlazingType:"",inserts:[],texts:[],bounds:null,unitFactor:1,ceilingHeight:2.46,selectedOpening:null,openingFacadeAssignments:{},doorClassifications:{},dragging:false,draft:null,pan:null,addMode:false,floors:[makeFloor(floorLabels[0])],floorCount:1,activeFloor:0,csvFloors:null};
+  const $ = id => document.getElementById(id);
+  const svg = $("planSvg");
+  function persistActiveFloor(){const floor=state.floors[state.activeFloor];if(!floor)return;Object.assign(floor,{dxf:state.dxf,walls:state.walls,inserts:state.inserts,texts:state.texts,bounds:state.bounds,unitFactor:state.unitFactor,facades:state.facades,rotation:state.rotation,zoom:state.zoom,selectedOpening:state.selectedOpening,openingFacadeAssignments:state.openingFacadeAssignments,doorClassifications:state.doorClassifications,rooms:state.rooms,csvRecords:state.csvRecords,ceilingHeight:state.ceilingHeight,defaultGlazingType:state.defaultGlazingType})}
+  function loadFloorState(index){const floor=state.floors[index];state.activeFloor=index;state.dxf=floor.dxf;state.walls=floor.walls||[];state.inserts=floor.inserts||[];state.texts=floor.texts||[];state.bounds=floor.bounds||null;state.unitFactor=floor.unitFactor||1;state.facades=floor.facades||[];state.rotation=floor.rotation||0;state.zoom=floor.zoom||1;state.selectedOpening=floor.selectedOpening??null;state.openingFacadeAssignments=floor.openingFacadeAssignments||{};state.doorClassifications=floor.doorClassifications||{};state.rooms=state.csvFloors?.roomsByFloor?.[floor.label]||floor.rooms||[];state.csvRecords=state.csvFloors?.walls?.filter(r=>canonicalFloorLabel(r.floor)===floor.label)||floor.csvRecords||[];state.ceilingHeight=state.csvFloors?.floorSettings?.[floor.label]?.ceiling||floor.ceilingHeight||state.csvFloors?.ceiling||2.46;state.defaultGlazingType=state.csvFloors?.floorSettings?.[floor.label]?.glazingType||floor.defaultGlazingType||state.csvFloors?.defaultGlazingType||"";$("rotation").value=state.rotation;$("rotationValue").textContent=`${state.rotation>0?"+":""}${state.rotation.toFixed(1)}° correction`}
+  function refreshFloorSelectors(){const targets=$("floorUploadTarget"),views=$("activeFloorSelect");targets.innerHTML="";views.innerHTML="";for(let i=0;i<state.floorCount;i++){const label=floorLabels[i];targets.add(new Option(`${label}${state.floors[i]?.dxf?" · DXF loaded":""}`,String(i)));views.add(new Option(`${label}${state.floors[i]?.dxf?" · loaded":""}`,String(i)))}targets.value=String(Math.min(state.activeFloor,state.floorCount-1));views.value=String(Math.min(state.activeFloor,state.floorCount-1));$("floorCount").value=String(state.floorCount)}
+  function switchFloor(index,fit=true){if(index<0||index>=state.floorCount)return;persistActiveFloor();loadFloorState(index);refreshFloorSelectors();const floor=state.floors[index];$("dxfName").textContent=floor.fileName||`Choose the ${floor.label} DXF`;$("planStatus").textContent=floor.dxf?`${floor.walls.length} wall outlines`:"Waiting for files";$("planSub").textContent=state.csv?`${state.rooms.length} rooms · ${state.csvRecords.length} wall / opening records · ${state.ceilingHeight.toFixed(2)} m ceiling`:"Upload a DXF and CSV to begin";if(fit&&floor.dxf)fitView();renderAll()}
+  function setFloorCount(count){count=Math.max(1,Math.min(4,Number(count)||1));persistActiveFloor();if(count<state.floorCount&&state.floors.slice(count).some(f=>f.dxf)&&!confirm("Reducing the floor count will remove the higher-floor DXFs and facade lines. Continue?")){ $("floorCount").value=String(state.floorCount);return}while(state.floors.length<count)state.floors.push(makeFloor(floorLabels[state.floors.length]));state.floors.length=count;state.floorCount=count;if(state.activeFloor>=count)state.activeFloor=count-1;loadFloorState(state.activeFloor);switchFloor(state.activeFloor,false)}
+  const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  function showToast(message){const t=$("toast");t.textContent=message;t.classList.add("show");clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove("show"),2800)}
+  function num(v){const n=parseFloat(String(v??"").replace(/[^\d.+-]/g,""));return Number.isFinite(n)?n:0}
+  function parseDelimited(text,delimiter=","){
+    const rows=[];let row=[],cell="",quoted=false;
+    for(let i=0;i<text.length;i++){const c=text[i];if(c==='"'){if(quoted&&text[i+1]==='"'){cell+='"';i++}else quoted=!quoted}else if(c===delimiter&&!quoted){row.push(cell.trim());cell=""}else if((c==="\n"||c==="\r")&&!quoted){if(c==="\r"&&text[i+1]==="\n")i++;row.push(cell.trim());if(row.some(x=>x!==""))rows.push(row);row=[];cell=""}else cell+=c}
+    if(cell!==""||row.length){row.push(cell.trim());if(row.some(x=>x!==""))rows.push(row)}return rows;
+  }
+  function canonicalFloorLabel(value){const text=String(value||"").trim().toLowerCase();if(/ground|\bfloor\s*0\b/.test(text))return "Ground Floor";const ordinal=text.match(/(\d+)\s*(?:st|nd|rd|th)?\s*floor/);if(ordinal){const n=Number(ordinal[1]);return floorLabels[n]||`${n}th Floor`}const word=text.match(/\b(first|second|third|fourth)\s+floor\b/);if(word)return {first:"1st Floor",second:"2nd Floor",third:"3rd Floor",fourth:"3rd Floor"}[word[1]];return null}
+  function parseCsv(text){
+    const rows=parseDelimited(text.replace(/^\uFEFF/,""));
+    let mode="",roomNames=[],roomsByFloor={},activeRoom="",currentFloor="Ground Floor",ceiling=0,defaultGlazingType="",walls=[],wallHeaders=[];
+    for(let i=0;i<rows.length;i++){
+      const r=rows[i].map(x=>x.trim());const first=(r[0]||"").toLowerCase();
+      if(first.startsWith("room attributes")){mode="rooms";continue}
+      if(first.startsWith("wall attributes")){mode="walls";activeRoom="";wallHeaders=r.map(x=>x.toLowerCase());continue}
+      if(first==="object count"||first==="object attributes"||first==="floor attributes"||first==="plan attributes"){mode="";continue}
+      if(mode==="rooms"){
+        const floorLabel=canonicalFloorLabel(r[0]);if(floorLabel){currentFloor=floorLabel;roomsByFloor[currentFloor]??=[];continue}
+        if(r.length===1){activeRoom=r[0];roomNames.push(activeRoom);continue}
+        if(r.length>8&&r[0]&&first!=="ground floor"){
+          activeRoom=r[0];if(!roomNames.some(n=>n.toLowerCase()===activeRoom.toLowerCase()))roomNames.push(activeRoom);if(!roomsByFloor[currentFloor])roomsByFloor[currentFloor]=[];if(!roomsByFloor[currentFloor].some(n=>n.toLowerCase()===activeRoom.toLowerCase()))roomsByFloor[currentFloor].push(activeRoom);
+          const h=num(r[9]);if(h>0&&!ceiling)ceiling=h;
+        }
+      } else if(mode==="walls"){
+        const floorLabel=canonicalFloorLabel(r[0]);if(floorLabel){currentFloor=floorLabel;continue}
+        if(r.length<6)continue;
+        const room=r[0],wallName=r[1],symbol=r[2];
+        if(!room||!/^wall\s*\d+/i.test(wallName||""))continue;
+        const wallIndex=(wallName.match(/\d+/)||[])[0];
+        const isWall=(symbol||"").toLowerCase()==="wall";
+        const glazingIndex=wallHeaders.findIndex(x=>x.includes("glazing type"));
+        walls.push({room,floor:currentFloor,wallIndex,symbol,area:num(r[3]),netArea:num(r[4]),width:num(r[5]),height:num(r[6]),type:r[8]||symbol||"Opening",annotation:r[7]||"",distanceToFloor:num(r[10]),glazingType:glazingIndex>=0?(r[glazingIndex]||""):"",isWall});
+      }
+    }
+    // Recover room order from ROOM ATTRIBUTES records; Magicplan's DXF insert names use that order.
+    const roomRows=rows.findIndex(r=>(r[0]||"").toLowerCase().startsWith("room attributes"));
+    if(roomRows>=0){roomNames=[];roomsByFloor={};let roomFloor="Ground Floor";for(let i=roomRows+1;i<rows.length;i++){const r=rows[i],f=(r[0]||"").toLowerCase();if(f.startsWith("wall attributes"))break;const floorLabel=canonicalFloorLabel(r[0]);if(floorLabel){roomFloor=floorLabel;roomsByFloor[roomFloor]??=[];continue}if(r.length>8&&r[0]){if(!roomNames.some(n=>n.toLowerCase()===r[0].toLowerCase()))roomNames.push(r[0]);if(!roomsByFloor[roomFloor])roomsByFloor[roomFloor]=[];if(!roomsByFloor[roomFloor].some(n=>n.toLowerCase()===r[0].toLowerCase()))roomsByFloor[roomFloor].push(r[0])}}}
+    const floorSettings={};
+    for(let i=0;i<rows.length;i++){if(!(rows[i][0]||"").toLowerCase().startsWith("floor attributes"))continue;const headers=rows[i].map(x=>x.toLowerCase()),hi=headers.findIndex(x=>x.includes("ceiling height")),gi=headers.findIndex(x=>x.trim()==="glazing type"||x.includes("glazing type"));for(let j=i+1;j<rows.length;j++){const row=rows[j],section=(row[0]||"").toLowerCase();if(/^(room|wall|object|plan) attributes/.test(section))break;const floor=canonicalFloorLabel(row[0]);if(!floor)continue;floorSettings[floor]={ceiling:hi>=0?num(row[hi]):0,glazingType:gi>=0?(row[gi]||""):""};if(floor==="Ground Floor"){if(floorSettings[floor].ceiling)ceiling=floorSettings[floor].ceiling;defaultGlazingType=floorSettings[floor].glazingType||defaultGlazingType}}}
+    if(!ceiling){const floor=rows.find(r=>(r[0]||"").toLowerCase()==="ground floor"&&r.length>8);if(floor)ceiling=num(floor[9])}
+    return {rooms:roomNames,roomsByFloor,walls,ceiling:ceiling||2.46,defaultGlazingType,floorSettings,floorNames:Object.keys(roomsByFloor)};
+  }
+  function parseDxf(text){
+    const lines=text.replace(/\r/g,"").split("\n"),pairs=[];for(let i=0;i+1<lines.length;i+=2)pairs.push([lines[i].trim(),lines[i+1].trim()]);
+    let inEntities=false,entity=null,entities=[];
+    for(const [code,value] of pairs){if(code==="0"&&value==="SECTION"){entity=null;continue}if(code==="2"&&value==="ENTITIES"){inEntities=true;continue}if(!inEntities)continue;if(code==="0"){if(value==="ENDSEC"){if(entity)entities.push(entity);break}if(entity)entities.push(entity);entity={type:value,pairs:[]};continue}if(entity)entity.pairs.push([code,value])}
+    const result={walls:[],inserts:[],texts:[],bounds:null,unitFactor:1};
+    let header=false;for(let i=0;i<pairs.length-1;i++){if(pairs[i][0]==="9"&&pairs[i][1]==="$INSUNITS"){const units=num(pairs[i+1][1]);result.unitFactor=units===4?0.001:units===5?0.01:units===6?1:units===1?0.0254:1;break}}
+    const all=[];
+    for(const e of entities){const p=e.pairs, get=c=>p.filter(a=>a[0]===c).map(a=>a[1]), one=c=>get(c)[0],layer=(one("8")||"").toLowerCase();
+      if(e.type==="LWPOLYLINE"&&layer==="walls"){
+        const xs=get("10").map(Number),ys=get("20").map(Number),pts=xs.map((x,i)=>({x:x*result.unitFactor,y:ys[i]*result.unitFactor}));if(pts.length>1){result.walls.push({pts,closed:(num(one("70"))&1)===1});all.push(...pts)}
+      } else if(e.type==="LINE"&&layer==="walls"){
+        const a={x:num(one("10"))*result.unitFactor,y:num(one("20"))*result.unitFactor},b={x:num(one("11"))*result.unitFactor,y:num(one("21"))*result.unitFactor};result.walls.push({pts:[a,b],closed:false});all.push(a,b)
+      } else if(e.type==="INSERT"&&(layer==="windows"||layer==="doors")){
+        const name=one("2")||"",match=name.match(/^W-(\d+)-(\d+)$/i);const item={x:num(one("10"))*result.unitFactor,y:num(one("20"))*result.unitFactor,angle:num(one("50")),name,layer,roomIndex:match?Number(match[1]):-1,wallIndex:match?String(Number(match[2])):"",block:name};result.inserts.push(item);all.push(item)
+      } else if(e.type==="TEXT"&&layer==="texts"){
+        let t=one("1")||"";t=t.replace(/\\U\+([0-9A-Fa-f]{4})/g,(_,hex)=>String.fromCharCode(parseInt(hex,16)));const item={x:num(one("10"))*result.unitFactor,y:num(one("20"))*result.unitFactor,text:t};result.texts.push(item);all.push(item)
+      }
+    }
+    if(all.length){const xs=all.map(p=>p.x),ys=all.map(p=>p.y);result.bounds={minX:Math.min(...xs),maxX:Math.max(...xs),minY:Math.min(...ys),maxY:Math.max(...ys)}}
+    return result;
+  }
+  function pointToSvg(p){return {x:p.x,y:-p.y}}
+  function autoPlaceFacades(){
+    if(!state.dxf||!state.walls.length){showToast("Load a DXF before auto-placing facades.");return}
+    const points=state.walls.flatMap(wall=>wall.pts),xs=points.map(p=>p.x),ys=points.map(p=>p.y),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys),offset=.5*3;
+    if(!Number.isFinite(minX)||!Number.isFinite(maxX)||maxX-minX<.1||maxY-minY<.1){showToast("Could not find usable wall bounds for auto-placement.");return}
+    state.facades=[
+      {id:state.nextFacadeId++,a:{x:minX,y:maxY+offset},b:{x:maxX,y:maxY+offset},direction:"N",automatic:true},
+      {id:state.nextFacadeId++,a:{x:maxX+offset,y:maxY},b:{x:maxX+offset,y:minY},direction:"E",automatic:true},
+      {id:state.nextFacadeId++,a:{x:maxX,y:minY-offset},b:{x:minX,y:minY-offset},direction:"S",automatic:true},
+      {id:state.nextFacadeId++,a:{x:minX-offset,y:minY},b:{x:minX-offset,y:maxY},direction:"W",automatic:true}
+    ];
+    state.openingFacadeAssignments={};state.addMode=false;state.draft=null;svg.classList.remove("canvas-mode");renderAll();
+    showToast("Added approximate N/E/S/W facade lines 1.5 m outside the plan bounds. Review and adjust them.");
+  }
+  function rotatedBounds(){const b=state.bounds,cx=(b.minX+b.maxX)/2,cy=-(b.minY+b.maxY)/2,angle=state.rotation*Math.PI/180,cos=Math.cos(angle),sin=Math.sin(angle);const corners=[{x:b.minX,y:-b.minY},{x:b.minX,y:-b.maxY},{x:b.maxX,y:-b.minY},{x:b.maxX,y:-b.maxY}].map(p=>({x:cx+(p.x-cx)*cos-(p.y-cy)*sin,y:cy+(p.x-cx)*sin+(p.y-cy)*cos}));return {minX:Math.min(...corners.map(p=>p.x)),maxX:Math.max(...corners.map(p=>p.x)),minY:Math.min(...corners.map(p=>p.y)),maxY:Math.max(...corners.map(p=>p.y))}}
+  function fitView(resetZoom=true){if(!state.bounds)return;if(resetZoom)state.zoom=1;const b=rotatedBounds(),pad=Math.max((b.maxX-b.minX)*.12,.6),padY=Math.max((b.maxY-b.minY)*.12,.6),w=((b.maxX-b.minX)+2*pad)*state.zoom,h=((b.maxY-b.minY)+2*padY)*state.zoom,cx=(b.minX+b.maxX)/2,cy=(b.minY+b.maxY)/2;svg.setAttribute("viewBox",`${cx-w/2} ${cy-h/2} ${w} ${h}`);$("zoomReadout").textContent=`${Math.round(100/state.zoom)}%`;drawPlan()}
+  function zoomPlan(factor,anchor){if(!state.bounds)return;const view=svg.viewBox.baseVal,oldZoom=state.zoom;state.zoom=Math.max(.2,Math.min(8,state.zoom*factor));const ratio=state.zoom/oldZoom;if(ratio===1)return;const x=anchor?.x??view.x+view.width/2,y=anchor?.y??view.y+view.height/2,w=view.width*ratio,h=view.height*ratio;svg.setAttribute("viewBox",`${x-(x-view.x)*ratio} ${y-(y-view.y)*ratio} ${w} ${h}`);$("zoomReadout").textContent=`${Math.round(100/state.zoom)}%`}
+  function drawPlan(){
+    if(!state.bounds){svg.innerHTML="";return}
+    const b=state.bounds,parts=[];
+    parts.push(`<rect x="${b.minX-1000}" y="${-b.maxY-1000}" width="${b.maxX-b.minX+2000}" height="${b.maxY-b.minY+2000}" fill="#fafbf9"/>`);
+    if($("gridSnap").checked){const spacing=.5,left=Math.floor((b.minX-2)/spacing)*spacing,right=Math.ceil((b.maxX+2)/spacing)*spacing,top=Math.floor((-b.maxY-2)/spacing)*spacing,bottom=Math.ceil((-b.minY+2)/spacing)*spacing;for(let x=left;x<=right+1e-8;x+=spacing){const major=Math.abs(x/2-Math.round(x/2))<1e-8;parts.push(`<line x1="${x}" y1="${top}" x2="${x}" y2="${bottom}" stroke="${major?"#d9e2dc":"#e9eeea"}" stroke-width="${major?".8":".55"}" vector-effect="non-scaling-stroke" pointer-events="none"/>`)}for(let y=top;y<=bottom+1e-8;y+=spacing){const major=Math.abs(y/2-Math.round(y/2))<1e-8;parts.push(`<line x1="${left}" y1="${y}" x2="${right}" y2="${y}" stroke="${major?"#d9e2dc":"#e9eeea"}" stroke-width="${major?".8":".55"}" vector-effect="non-scaling-stroke" pointer-events="none"/>`)}}
+    for(const wall of state.walls){const pts=wall.pts.map(pointToSvg);if(wall.closed)parts.push(`<polygon points="${pts.map(p=>`${p.x},${p.y}`).join(" ")}" fill="#dfe6e0" stroke="#4c5751" stroke-width=".045" vector-effect="non-scaling-stroke"/>`);else parts.push(`<polyline points="${pts.map(p=>`${p.x},${p.y}`).join(" ")}" fill="none" stroke="#4c5751" stroke-width=".055" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`)}
+    for(const label of state.texts){if(label.text.length>1&&label.text.length<30){const p=pointToSvg(label);parts.push(`<text x="${p.x}" y="${p.y}" text-anchor="middle" font-size=".17" fill="#718078" font-family="system-ui" pointer-events="none">${esc(label.text)}</text>`)} }
+    const openingAssignments=openingRecordAssignments();
+    for(let i=0;i<state.inserts.length;i++){const o=state.inserts[i],p=pointToSvg(o),matched=matchOpening(o,i,openingAssignments),color=o.layer==="windows"?"#2581c4":"#171b19",selected=state.selectedOpening===i?" selected":"";parts.push(`<g class="opening-mark${selected}" data-i="${i}" transform="translate(${p.x} ${p.y})"><circle r=".115" fill="${color}" stroke="white" stroke-width=".04" vector-effect="non-scaling-stroke"/><title>${esc(`${o.name} · ${matched?`${matched.room} · Wall ${matched.wallIndex} · ${matched.type}`:"No CSV match"}`)}</title></g>`)}
+    for(let i=0;i<state.facades.length;i++){const f=state.facades[i],a=pointToSvg(f.a),c=pointToSvg(f.b),dir=effectiveDirection(f.direction,state.rotation),color=colors[f.direction]||"#168365";parts.push(`<g class="facade-mark" data-i="${i}"><line x1="${a.x}" y1="${a.y}" x2="${c.x}" y2="${c.y}" stroke="${color}" stroke-width="5" stroke-linecap="round" vector-effect="non-scaling-stroke"/><circle cx="${a.x}" cy="${a.y}" r=".07" fill="white" stroke="${color}" stroke-width="2.5" vector-effect="non-scaling-stroke"/><circle cx="${c.x}" cy="${c.y}" r=".07" fill="white" stroke="${color}" stroke-width="2.5" vector-effect="non-scaling-stroke"/><text x="${(a.x+c.x)/2}" y="${(a.y+c.y)/2-.14}" text-anchor="middle" font-size=".18" font-weight="700" fill="${color}" stroke="white" stroke-width=".055" paint-order="stroke" font-family="system-ui">${dir} · ${lineLength(f).toFixed(2)}m</text></g>`)}
+    if(state.draft){const a=pointToSvg(state.draft.a),c=pointToSvg(state.draft.b);parts.push(`<line x1="${a.x}" y1="${a.y}" x2="${c.x}" y2="${c.y}" stroke="#16745a" stroke-width="5" stroke-dasharray="8 5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`)}
+    const cx=(b.minX+b.maxX)/2,cy=-(b.minY+b.maxY)/2;
+    svg.innerHTML=`<g transform="rotate(${state.rotation} ${cx} ${cy})">${parts.join("")}</g>`;
+  }
+  function lineLength(f){return Math.hypot(f.b.x-f.a.x,f.b.y-f.a.y)}
+  function effectiveDegrees(direction,rotation){const index=directions.indexOf(direction);return (((index*22.5+rotation)%360)+360)%360}
+  function effectiveDirection(direction,rotation){return directions[Math.round(effectiveDegrees(direction,rotation)/22.5)%16]||direction}
+  function openingRecordAssignments(){
+    const groups=new Map(),assignments=new Map();
+    for(const record of state.csvRecords){if(record.isWall)continue;const kind=/window/i.test(record.type)?"window":"door",key=`${record.room.trim().toLowerCase()}|${kind}`;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(record)}
+    const consumed=new Map();
+    state.inserts.forEach((insert,index)=>{const room=state.rooms[insert.roomIndex];if(!room)return;const kind=insert.layer==="windows"?"window":"door",key=`${room.trim().toLowerCase()}|${kind}`,records=groups.get(key)||[],next=consumed.get(key)||0;if(records[next]){assignments.set(index,records[next]);consumed.set(key,next+1)}});
+    return assignments;
+  }
+  function matchOpening(o,index,assignments=openingRecordAssignments()){return assignments.get(index)||null}
+  function isDoubleGlazed(type){return /^double\.glazed\.(air|argon)\.filled$/i.test(String(type||"").trim().replace(/[ _]+/g,"."))}
+  function rayFacade(o){
+    const angle=(Number(o.angle)||0)*Math.PI/180;
+    // DXF block angle describes the opening's axis; test both perpendicular normals.
+    const normal={x:Math.sin(angle),y:Math.cos(angle)},rays=[normal,{x:-normal.x,y:-normal.y}],hits=[];
+    for(let i=0;i<state.facades.length;i++){
+      const f=state.facades[i],edge={x:f.b.x-f.a.x,y:f.b.y-f.a.y},offset={x:f.a.x-o.x,y:f.a.y-o.y};
+      for(const direction of rays){const denominator=direction.x*edge.y-direction.y*edge.x;if(Math.abs(denominator)<1e-9)continue;const distance=(offset.x*edge.y-offset.y*edge.x)/denominator,along=(offset.x*direction.y-offset.y*direction.x)/denominator;if(distance>1e-6&&along>=-1e-6&&along<=1+1e-6)hits.push({index:i,distance,projection:along,ray:direction})}
+    }
+    return hits.sort((a,b)=>a.distance-b.distance)[0]||null;
+  }
+  function nearestFacade(o){
+    if(o.layer==="windows")return rayFacade(o);
+    let best=null;
+    for(let i=0;i<state.facades.length;i++){const f=state.facades[i],dx=f.b.x-f.a.x,dy=f.b.y-f.a.y,length=Math.hypot(dx,dy),l2=length*length;if(!l2)continue;const extension=Math.max(.5,Math.min(1.5,length*.08)),t=((o.x-f.a.x)*dx+(o.y-f.a.y)*dy)/l2;if(t< -extension/length||t>1+extension/length)continue;const clamped=Math.max(0,Math.min(1,t)),distance=Math.hypot(o.x-(f.a.x+clamped*dx),o.y-(f.a.y+clamped*dy));if(!best||distance<best.distance)best={index:i,distance,projection:t}}
+    return best&&best.distance<=3?best:null;
+  }
+  function getDetectedOpenings(){const assignments=openingRecordAssignments();return state.inserts.map((o,index)=>{const automaticNear=nearestFacade(o),manualId=state.openingFacadeAssignments[index],manualIndex=manualId===undefined?-1:state.facades.findIndex(f=>f.id===manualId),record=matchOpening(o,index,assignments),override=document.querySelector(`[data-opening="${index}"]`)?.value,original=record?.type||(o.layer==="windows"?"Window":"Door"),category=override||(/window/i.test(original)?"Window":"Door"),area=record?.area||((record?.width||0)*(record?.height||0)),glazingType=record?.glazingType?.trim()||state.defaultGlazingType,explicitExternalDoor=/glass\s*door|patio\s*door|external|exterior/i.test(`${record?.symbol||""} ${record?.type||""}`),doorClassification=state.doorClassifications[index]||"auto",isExternalDoor=o.layer!=="doors"||doorClassification==="external"||(doorClassification==="auto"&&Boolean(automaticNear&&(automaticNear.distance<=3||explicitExternalDoor))),near=manualId!==undefined?(manualIndex>=0?{index:manualIndex,manual:true}:null):o.layer==="doors"&&!isExternalDoor?null:automaticNear;return {o,index,near,automaticNear,record,category,area,original,glazingType,doubleGlazed:category==="Window"&&isDoubleGlazed(glazingType),doorClassification,isExternalDoor}})}
+  function getExternalOpenings(){return getDetectedOpenings().filter(x=>x.near&&(x.o.layer!=="doors"||x.isExternalDoor))}
+  function drawFacades(){const list=$("facadeList");list.innerHTML="";if(!state.facades.length){list.innerHTML='<div style="font-size:10px;color:#97a199;text-align:center;padding:12px 5px 14px">No facades traced yet</div>'}else state.facades.forEach((f,i)=>{const deg=effectiveDegrees(f.direction||"N",state.rotation),heading=effectiveDirection(f.direction||"N",state.rotation),used=state.facades.map((x,j)=>j!==i?x.direction:null).filter(Boolean);const row=document.createElement("div");row.className="facet";row.innerHTML=`<div class="facet-label" style="color:${colors[f.direction]||'#16745a'}">${i+1}</div><div class="facet-meta"><strong>Facade ${i+1} · ${lineLength(f).toFixed(2)} m</strong><small>${heading} facing · ${deg.toFixed(1)}°</small></div><div><select aria-label="Facade ${i+1} compass direction" data-direction="${i}"><option value="">Assign…</option>${cardinal.map(d=>`<option value="${d}" ${f.direction===d?'selected':''} ${used.includes(d)?'disabled':''}>${d}</option>`).join("")}</select><div class="degrees">${deg.toFixed(1)}°</div></div><button class="remove-line" title="Remove facade" data-remove="${i}" aria-label="Remove facade">×</button>`;list.appendChild(row)});
+    list.querySelectorAll("[data-direction]").forEach(el=>el.addEventListener("change",e=>{state.facades[Number(e.target.dataset.direction)].direction=e.target.value||null;renderAll()}));list.querySelectorAll("[data-remove]").forEach(el=>el.addEventListener("click",e=>{const [removed]=state.facades.splice(Number(e.currentTarget.dataset.remove),1);for(const [opening,facadeId] of Object.entries(state.openingFacadeAssignments))if(facadeId===removed.id)delete state.openingFacadeAssignments[opening];renderAll()}));
+    const unassigned=state.facades.filter(f=>!f.direction).length,missing=cardinal.filter(d=>!state.facades.some(f=>f.direction===d));const validation=$("validation");if(missing.length||unassigned){validation.classList.add("show");validation.textContent=unassigned?`Assign a compass direction to ${unassigned} facade line${unassigned===1?"":"s"}. Missing: ${missing.length?missing.join(", "):"none"}.`:`Missing facade line${missing.length===1?"":"s"}: ${missing.join(", ")}. Add and assign each direction to complete the estimate.`}else validation.classList.remove("show");
+    const canAdd=state.dxf&&state.csv&&state.facades.length<4;$("addFacade").disabled=!canAdd;$("autoFacadeButton").disabled=!state.dxf;$("addLabel").textContent=state.facades.length>=4?"Four facade lines added":"Add a facade line";$("canvasCaption").textContent=state.addMode?"Drag along the facade, then release":"Drag to pan · click “Add a facade line” to trace";
+  }
+  function drawOpeningList(){
+    const list=$("openingList"),opens=getDetectedOpenings(),matched=opens.filter(x=>x.near).length;
+    $("openingCount").textContent=`${matched} / ${opens.length} on facades`;
+    if(!opens.length){list.innerHTML='<div class="empty-openings">Upload a DXF to identify its door and window markers.</div>';return}
+    list.innerHTML=opens.map(x=>{
+      const room=state.rooms[x.o.roomIndex]||"Unknown room",width=x.record?.width?`${x.record.width.toFixed(2)} m wide`:"width unavailable",name=x.record?.type||(x.o.layer==="windows"?"Window":"Door");
+      const status=x.o.layer==="doors"&&x.doorClassification==="internal"?"Internal door · excluded from exterior totals":x.o.layer==="doors"&&!x.isExternalDoor?"Not auto-matched as external · click to classify":x.near?`On facade ${x.near.index+1}${x.near.manual?" · manual":` · ${x.o.layer==="windows"?"outward ray":"nearest"}, ${x.near.distance.toFixed(2)} m`}`:x.o.layer==="windows"?"No facade hit by outward ray":"External door · assign to a facade";
+      return `<div class="opening-row"><div class="opening-icon">${x.category==="Window"?"▱":"▯"}</div><div class="opening-details"><strong>${esc(room)} · Wall ${esc(x.o.wallIndex||"?")} · ${esc(name)}</strong><small>${width} · ${x.area.toFixed(2)} m² opening<span class="opening-status">${status}</span></small></div><select aria-label="Classify ${esc(room)} ${esc(name)}" data-opening="${x.index}"><option value="Window" ${x.category==="Window"?'selected':''}>Window</option><option value="Door" ${x.category==="Door"?'selected':''}>Door</option></select></div>`;
+    }).join("");
+    list.querySelectorAll("[data-opening]").forEach(el=>el.addEventListener("change",()=>renderSummary()));
+  }
+  function drawSelectedOpening(){
+    const panel=$("selectedOpening"),item=getDetectedOpenings().find(x=>x.index===state.selectedOpening);
+    if(!item){panel.innerHTML='<div class="empty-openings">Click an orange or brown marker on the plan to inspect and assign it.</div>';return}
+    const room=state.rooms[item.o.roomIndex]||"Unknown room",markerNo=item.o.name,selected=state.openingFacadeAssignments[item.index]!==undefined?String(state.openingFacadeAssignments[item.index]):"auto";
+    const classification=item.o.layer==="doors"?`<label>Door location<select id="doorClassification"><option value="auto" ${item.doorClassification==="auto"?'selected':''}>Automatic</option><option value="external" ${item.doorClassification==="external"?'selected':''}>External door</option><option value="internal" ${item.doorClassification==="internal"?'selected':''}>Internal door</option></select></label>`:"";
+    const doorStatus=item.doorClassification==="internal"?"Internal door · excluded from exterior totals":item.o.layer==="doors"&&!item.isExternalDoor?"Not auto-matched as external · set External if needed":item.o.layer==="doors"&&!item.near?"External door · assign to a facade":item.near?`Currently counted on Facade ${item.near.index+1}`:"Not currently counted on a facade";
+    panel.innerHTML=`<div class="selected-opening-head"><i class="selected-opening-dot ${item.o.layer==="windows"?"window":"door"}"></i>DXF marker ${esc(markerNo)} · ${esc(item.o.layer==="windows"?"Window":item.isExternalDoor?"External door":"Door / opening")}</div><div class="selected-opening-meta">${esc(room)} · ${esc(item.record?.type||"No CSV dimensions matched")}${item.record?` · CSV Wall ${esc(item.record.wallIndex)}`:""}<br>${item.record?.width?`${item.record.width.toFixed(2)} m wide · ${item.area.toFixed(2)} m²`:"Width/area unavailable in matched CSV record"}<br>${doorStatus}</div>${classification}<label>Assign to facade<select id="selectedFacadeAssignment"><option value="auto" ${selected==="auto"?'selected':''}>Automatic matching</option>${state.facades.map((f,i)=>`<option value="${f.id}" ${selected===String(f.id)?'selected':''}>Facade ${i+1}${f.direction?` · ${f.direction}`:""}</option>`).join("")}</select></label>`;
+    $("selectedFacadeAssignment").addEventListener("change",e=>{if(e.target.value==="auto")delete state.openingFacadeAssignments[item.index];else state.openingFacadeAssignments[item.index]=Number(e.target.value);renderAll()});
+    if(item.o.layer==="doors")$("doorClassification").addEventListener("change",e=>{if(e.target.value==="auto")delete state.doorClassifications[item.index];else state.doorClassifications[item.index]=e.target.value;renderAll()});
+  }
+  function renderSummary(){
+    persistActiveFloor();
+    const floorData=[];
+    for(let i=0;i<state.floorCount;i++){
+      const floor=state.floors[i];if(!floor?.dxf)continue;
+      loadFloorState(i);const opens=getExternalOpenings();
+      const directionsReady=cardinal.every(d=>state.facades.some(f=>f.direction===d));
+      if(!directionsReady)continue;
+      floorData.push(cardinal.map(d=>{const f=state.facades.find(x=>x.direction===d),length=lineLength(f),gross=length*state.ceilingHeight,assigned=opens.filter(o=>o.near.index===state.facades.indexOf(f)),allOpening=assigned.reduce((sum,o)=>sum+o.area,0),windowItems=assigned.filter(o=>o.category==="Window");return {d,length,gross,net:Math.max(0,gross-allOpening),windows:windowItems.reduce((sum,o)=>sum+o.area,0),doubleGlazed:windowItems.filter(o=>o.doubleGlazed).reduce((sum,o)=>sum+o.area,0)}}));
+    }
+    loadFloorState(state.activeFloor);const rows=$("directionRows"),ready=floorData.length===state.floorCount;
+    if(!ready){
+      $("grossTotal").innerHTML='— <span class="unit">m²</span>';
+      $("netTotal").innerHTML='— <span class="unit">m²</span>';
+      $("windowTotal").innerHTML='— <span class="unit">m²</span>';
+      $("doubleWindowTotal").innerHTML='— <span class="unit">m²</span>';
+      const missingDxfs=state.floorCount-state.floors.filter(f=>f.dxf).length;
+      $("summaryStatus").textContent=missingDxfs?`Needs ${missingDxfs} floor DXF${missingDxfs===1?"":"s"}: ${state.floors.filter(f=>!f.dxf).map(f=>f.label).join(", ")}`:"Needs facades";
+      $("summarySub").textContent="Upload each selected floor and assign N, E, S, W on every floor";
+      rows.innerHTML='<tr><td colspan="6" style="text-align:center;color:#97a199;padding:18px">Each floor needs a DXF and four assigned facade directions before the whole-home summary is ready.</td></tr>';
+      return;
+    }
+    const data=cardinal.map((d,index)=>floorData.reduce((sum,floorRows)=>{const row=floorRows[index];return {d,length:sum.length+row.length,gross:sum.gross+row.gross,net:sum.net+row.net,windows:sum.windows+row.windows,doubleGlazed:sum.doubleGlazed+row.doubleGlazed}}, {d,length:0,gross:0,net:0,windows:0,doubleGlazed:0}));
+    const allGross=data.reduce((s,x)=>s+x.gross,0),allNet=data.reduce((s,x)=>s+x.net,0),allWindow=data.reduce((s,x)=>s+x.windows,0),allDoubleWindow=data.reduce((s,x)=>s+x.doubleGlazed,0);
+    $("grossTotal").innerHTML=`${allGross.toFixed(2)} <span class="unit">m²</span>`;
+    $("netTotal").innerHTML=`${allNet.toFixed(2)} <span class="unit">m²</span>`;
+    $("windowTotal").innerHTML=`${allWindow.toFixed(2)} <span class="unit">m²</span>`;
+    $("doubleWindowTotal").innerHTML=`${allDoubleWindow.toFixed(2)} <span class="unit">m²</span>`;
+    $("summaryStatus").textContent=`${state.floorCount} floor${state.floorCount===1?"":"s"} · complete`;
+    $("summarySub").textContent=`${state.floors.filter(f=>f.dxf).map(f=>f.label).join(" · ")} · whole-home totals`;
+    rows.innerHTML=data.map(x=>`<tr><td><span class="dir-chip">${x.d}</span></td><td>${x.length.toFixed(2)} m</td><td>${x.gross.toFixed(2)} m²</td><td>${x.net.toFixed(2)} m²</td><td>${x.windows.toFixed(2)} m²</td><td>${x.doubleGlazed.toFixed(2)} m²</td></tr>`).join("");
+  }
+  function renderAll(){drawFacades();drawPlan();drawOpeningList();drawSelectedOpening();renderSummary()}
+  function clearFacadeTraces(){state.facades=[];state.openingFacadeAssignments={};state.doorClassifications={};state.selectedOpening=null;state.addMode=false;state.dragging=false;state.draft=null;state.pan=null;svg.classList.remove("canvas-mode","is-panning")}
+  function screenPoint(event){const pt=svg.createSVGPoint();pt.x=event.clientX;pt.y=event.clientY;const p=pt.matrixTransform(svg.getScreenCTM().inverse()),b=state.bounds,cx=(b.minX+b.maxX)/2,cy=-(b.minY+b.maxY)/2,angle=-state.rotation*Math.PI/180,cos=Math.cos(angle),sin=Math.sin(angle),dx=p.x-cx,dy=p.y-cy;let x=cx+dx*cos-dy*sin,y=-(cy+dx*sin+dy*cos);if($("gridSnap").checked){const step=.5;x=Math.round(x/step)*step;y=Math.round(y/step)*step}return {x,y}}
+  $("dxfFile").addEventListener("change",async e=>{const file=e.target.files[0];if(!file)return;const target=Number($("floorUploadTarget").value)||0;try{const parsed=parseDxf(await file.text());if(!parsed.walls.length)throw Error("No wall geometry found in the DXF walls layer.");persistActiveFloor();state.activeFloor=target;const floor=state.floors[target];Object.assign(floor,{dxf:parsed,walls:parsed.walls,inserts:parsed.inserts,texts:parsed.texts,bounds:parsed.bounds,unitFactor:parsed.unitFactor,facades:[],rotation:0,zoom:1,selectedOpening:null,openingFacadeAssignments:{},doorClassifications:{},fileName:file.name});loadFloorState(target);$("canvasWrap").classList.add("has-plan");refreshFloorSelectors();$("dxfName").textContent=`${floor.label}: ${file.name}`;$("planStatus").textContent=`${parsed.walls.length} wall outlines`;fitView();renderAll();showToast(`${floor.label} plan loaded. Upload the other floor DXFs and the single home CSV.`)}catch(err){showToast(err.message||"Could not read this DXF export.");e.target.value=""}});
+  $("csvFile").addEventListener("change",async e=>{const file=e.target.files[0];if(!file)return;try{const parsed=parseCsv(await file.text());if(!parsed.walls.length)throw Error("No WALL ATTRIBUTES records found in this CSV.");persistActiveFloor();state.csv=parsed;state.csvFloors=parsed;const csvFloorCount=Math.max(1,...parsed.floorNames.map(name=>floorLabels.indexOf(name)+1));if(state.floorCount===1&&csvFloorCount>1){state.floorCount=Math.min(4,csvFloorCount);while(state.floors.length<state.floorCount)state.floors.push(makeFloor(floorLabels[state.floors.length]))}for(let i=0;i<state.floorCount;i++){const floor=state.floors[i];floor.label=floorLabels[i];floor.facades=[];floor.openingFacadeAssignments={};floor.doorClassifications={};floor.selectedOpening=null;floor.rooms=parsed.roomsByFloor[floor.label]||[];floor.csvRecords=parsed.walls.filter(r=>canonicalFloorLabel(r.floor)===floor.label);floor.ceilingHeight=parsed.floorSettings[floor.label]?.ceiling||parsed.ceiling;floor.defaultGlazingType=parsed.floorSettings[floor.label]?.glazingType||parsed.defaultGlazingType}loadFloorState(state.activeFloor);$("csvName").textContent=file.name;$("planSub").textContent=`${state.floorCount} floor${state.floorCount===1?"":"s"} · ${parsed.rooms.length} total rooms · shared home statistics`;refreshFloorSelectors();$("canvasWrap").classList.toggle("has-plan",state.floors.some(f=>f.dxf));renderAll();showToast("Home statistics loaded for all floors. Each selected floor needs its own DXF.")}catch(err){showToast(err.message||"Could not read this statistics CSV.");e.target.value=""}});
+  $("floorCount").addEventListener("change",e=>setFloorCount(e.target.value));
+  $("floorUploadTarget").addEventListener("change",e=>switchFloor(Number(e.target.value)));
+  $("activeFloorSelect").addEventListener("change",e=>switchFloor(Number(e.target.value)));
+  $("addFacade").addEventListener("click",()=>{if(!state.dxf||!state.csv)return;state.addMode=true;svg.classList.add("canvas-mode");showToast("Drag a line along one facade on the floor plan")});
+  $("autoFacadeButton").addEventListener("click",autoPlaceFacades);
+  svg.addEventListener("pointerdown",e=>{if(!state.bounds||e.button!==0)return;e.preventDefault();state.dragging=true;svg.setPointerCapture(e.pointerId);if(state.addMode){state.draft={a:screenPoint(e),b:screenPoint(e)};drawPlan()}else{const v=svg.viewBox.baseVal,marker=e.target.closest?.(".opening-mark");state.pan={x:e.clientX,y:e.clientY,marker:marker?Number(marker.dataset.i):null,viewBox:{x:v.x,y:v.y,width:v.width,height:v.height}};svg.classList.add("is-panning")}});
+  svg.addEventListener("pointermove",e=>{if(!state.dragging)return;if(state.draft){state.draft.b=screenPoint(e);drawPlan();return}if(state.pan){const scale=Math.min(svg.clientWidth/state.pan.viewBox.width,svg.clientHeight/state.pan.viewBox.height),dx=(e.clientX-state.pan.x)/scale,dy=(e.clientY-state.pan.y)/scale,v=state.pan.viewBox;svg.setAttribute("viewBox",`${v.x-dx} ${v.y-dy} ${v.width} ${v.height}`)}});
+  function selectOpening(index){state.selectedOpening=index;drawPlan();drawSelectedOpening()}
+  svg.addEventListener("pointerup",e=>{if(!state.dragging)return;state.dragging=false;svg.classList.remove("is-panning");if(state.pan){const pan=state.pan;state.pan=null;if(pan.marker!==null&&Math.hypot(e.clientX-pan.x,e.clientY-pan.y)<6)selectOpening(pan.marker);return}const f=state.draft;state.draft=null;state.addMode=false;svg.classList.remove("canvas-mode");if(lineLength(f)<.15){renderAll();return}state.facades.push({...f,id:state.nextFacadeId++,direction:null});renderAll();const d=cardinal.find(x=>!state.facades.some((a,i)=>i!==state.facades.length-1&&a.direction===x));showToast(d?`Facade line saved. Assign its direction; ${d} is still available.`:"Facade line saved. Assign an unused direction.")});
+  svg.addEventListener("click",e=>{const marker=e.target.closest?.(".opening-mark");if(marker)selectOpening(Number(marker.dataset.i))});
+  $("openingList").addEventListener("click",e=>{if(e.target.closest?.("select"))return;const row=e.target.closest?.(".opening-row");if(!row)return;state.selectedOpening=Number(row.querySelector("[data-opening]").dataset.opening);drawPlan();drawSelectedOpening()});
+  svg.addEventListener("pointercancel",()=>{state.dragging=false;state.draft=null;state.pan=null;svg.classList.remove("is-panning");renderAll()});
+  $("rotation").addEventListener("input",e=>{state.rotation=Number(e.target.value);$("rotationValue").textContent=`${state.rotation>0?"+":""}${state.rotation.toFixed(1)}° correction`;fitView(false);renderAll()});
+  $("zoomInButton").addEventListener("click",()=>zoomPlan(.8));
+  $("zoomOutButton").addEventListener("click",()=>zoomPlan(1.25));
+  svg.addEventListener("wheel",e=>{if(!state.bounds)return;e.preventDefault();const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;zoomPlan(e.deltaY<0?.85:1.18,pt.matrixTransform(svg.getScreenCTM().inverse()))},{passive:false});
+  $("gridSnap").addEventListener("change",drawPlan);
+  $("fitButton").addEventListener("click",fitView);
+  $("clearButton").addEventListener("click",()=>{state.facades=[];state.openingFacadeAssignments={};state.addMode=false;state.draft=null;svg.classList.remove("canvas-mode");renderAll()});
+  renderAll();
+})();
+</script>
+</body>
+</html>
